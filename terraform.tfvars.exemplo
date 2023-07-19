@@ -1,0 +1,51 @@
+# Renomeie este arquivo, ou crie outro, com nome terraform.tfvars
+# Depois adicione os valores desejados para as variáveis abaixo.
+# Isto evitará que sejam solicitados valores para estas variávies 
+# quando forem executados os comandos do terraform.
+
+rds-identificador = "projeto12"
+rds-nome-usuario = "mediacms"
+rds-senha-usuario = "mediacms"
+rds-nome-banco = "mediacms"
+rds-tipo-instancia = "db.t3.micro"
+
+# Assim que iniciar o processo, você receberá um email
+# autorizando o SNS. Aceite!
+# ocê receberá um email quando finalizar a instalação
+sns-email="seuemail@gmail.com"
+
+ec2-tipo-instancia="t3a.small" # 2 vCPU, 1 GB
+
+# Nome do certificado para ser usado.
+# Se for wildcard usar com * como neste exemplo.
+certificate-domain="*.seudominio.com.br"
+
+# Como o bucket deve ser unico em toda a AWS, 
+# sugiro modifica este nome para evitar conflito.
+nome-bucket = "ct-projeto12-2023-mediacms"  
+
+# Se true, cria a entrada www na zona especificada.
+create-domain-www=false
+hosted_zone_name = "seudominio.com.br" 
+
+# Se tem um domínio no Route53 especifique aqui
+# e informe a zona e o subdomínio a ser criado.
+has-domain=false
+
+# subdominio que será criado sob o hosted_zone_name
+domain="mediacms" 
+# route53-zone -> Inferido em get_general_resources.tf
+
+# Nome do profile criado com AWS CLI com as
+# credenciais do IAM.
+profile = "meuprofile"
+
+# Especifique o nome da tag padrão utilizada nos nomes dos serviços
+tag-base = "projeto12"
+
+# Especifique o nome da chave pem para associar a instância
+ec2-chave-instancia = "nome_chave_pem"
+
+# Especifique o nome do arquivo para carregar no user_data
+# caso deseje um diferente do padrão.
+arquivo-user-data = "projeto_user_data.sh"
