@@ -7,53 +7,25 @@ sudo apt install s3fs -y
 # Configura o s3fs
 mkdir -p /home/mediacms.io/mediacms/media_files
 cd /home/mediacms.io/mediacms
-# sudo systemctl stop mediacms celery_long celery_short
 
 # Cria o arquivo com as credenciais do S3
 echo '${s3_user_id}:${s3_user_secret}' > .passwd-s3fs
 chmod 600 .passwd-s3fs
 
-# mv media_files media_files_tmp
-# mkdir media_files
-
-# Verificar uid e gid
-# sudo cat /etc/passwd
-
 uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
 gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
 sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002 -o passwd_file=.passwd-s3fs
 
-# s3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs
-# mv media_files_tmp/hls media_files/hls
-# mv media_files_tmp/userlogos media_files/userlogos 
-# rm -rf media_files_tmp
-
-# sudo systemctl start mediacms celery_long celery_short
-
-# Removido por ja ter sido executado
-# sudo -H -u www-data bash -c 's3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs'
-
-# sudo mkdir /home/mediacms.io && cd /home/mediacms.io/
-# sudo git clone https://github.com/mediacms-io/mediacms
-# cd /home/mediacms.io/mediacms/
+# Baixando o projeto
 cd /home/mediacms.io/mediacms
 sudo git init 
 sudo git remote add origin https://github.com/mediacms-io/mediacms
 sudo git pull origin main 
 
 # Define o endereço das mídias
-# sudo sed -i 's/MEDIA_URL = "/media/"/MEDIA_URL = "https://${cloudfront_domain_name}/"/g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = "https://${cloudfront_domain_name}/"#g' /home/mediacms.io/mediacms/cms/settings.py
-#sudo sed -i 's/HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")/HLS_DIR = "https://${cloudfront_domain_name}/hls/"/g' /home/mediacms.io/mediacms/cms/settings.py
-# sudo sed -i 's#HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")#HLS_DIR = "https://${cloudfront_domain_name}/hls/"#g' /home/mediacms.io/mediacms/cms/settings.py
-# sudo sed -i 's#240, 360#360, 720, 2160#g' /home/mediacms.io/mediacms/cms/settings.py
-
-# sudo sed -i 's#240, 360#360, 720, 2160#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Define os dados do EMAIL e SES
-
-echo "${sns_email} ${smtp_user} ${smtp_host}" > /home/mediacms.io/mediacms/ses.txt
-
 sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = "${smtp_user}"#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#info@mediacms.io#${sns_email}#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#xyz#${smtp_password}#g' /home/mediacms.io/mediacms/cms/settings.py
@@ -66,7 +38,7 @@ sudo sed -i 's#Europe/London#America/Recife#g' /home/mediacms.io/mediacms/cms/se
 # Define as credenciais do banco
 sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": "${rds_addr}"#g' /home/mediacms.io/mediacms/cms/settings.py
 
-# Instalação
+# Instalação do MediacMS
 echo "Welcome to the MediacMS installation!";
 
 osVersion=$(lsb_release -d)
