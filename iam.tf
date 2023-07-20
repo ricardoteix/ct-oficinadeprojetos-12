@@ -89,11 +89,7 @@ resource "aws_iam_role_policy" "projeto-policy" {
         {
             "Sid": "VisualEditor1",
             "Effect": "Allow",
-            "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:DeleteObject"
-            ],
+            "Action": "*",
             "Resource": "arn:aws:s3:::${var.nome-bucket}/*"
         }
     ]

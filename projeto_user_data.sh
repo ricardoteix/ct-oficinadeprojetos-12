@@ -2,10 +2,45 @@
 
 sudo apt update
 sudo apt-get install postgresql-client -y
+sudo apt install s3fs -y
 
-sudo mkdir /home/mediacms.io && cd /home/mediacms.io/
-sudo git clone https://github.com/mediacms-io/mediacms
-cd /home/mediacms.io/mediacms/ 
+# Configura o s3fs
+mkdir -p /home/mediacms.io/mediacms/media_files
+cd /home/mediacms.io/mediacms
+# sudo systemctl stop mediacms celery_long celery_short
+
+# Cria o arquivo com as credenciais do S3
+echo '${s3_user_id}:${s3_user_secret}' > .passwd-s3fs
+chmod 600 .passwd-s3fs
+
+# mv media_files media_files_tmp
+# mkdir media_files
+
+# Verificar uid e gid
+# sudo cat /etc/passwd
+
+sudo s3fs ${s3_bucket_name} media_files -ouid=33,gid=33,allow_other,mp_umask=002 -o passwd_file=.passwd-s3fs
+
+# s3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs
+# mv media_files_tmp/hls media_files/hls
+# mv media_files_tmp/userlogos media_files/userlogos 
+# rm -rf media_files_tmp
+
+# sudo systemctl start mediacms celery_long celery_short
+
+sudo -H -u www-data bash -c 's3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs'
+
+# sudo mkdir /home/mediacms.io && cd /home/mediacms.io/
+# sudo git clone https://github.com/mediacms-io/mediacms
+# cd /home/mediacms.io/mediacms/
+cd /home/mediacms.io/mediacms
+sudo git init 
+sudo git remote add origin https://github.com/mediacms-io/mediacms
+sudo git pull origin main 
+
+# Define o endereço das mídias
+sudo sed -i 's/MEDIA_URL = "/media/"/MEDIA_URL = "https://${cloudfront_domain_name}/"/g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's/HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")/HLS_DIR = "https://${cloudfront_domain_name}/hls/"/g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Define as credenciais do banco
 sudo sed -i 's/"HOST": "127.0.0.1"/"HOST": "${rds_addr}"/g' /home/mediacms.io/mediacms/cms/settings.py
@@ -112,13 +147,6 @@ echo 'MediaCMS installation completed, open browser on http://'"$FRONTEND_HOST"'
 
 echo 'O login do administrador é admin e a senha é '"$ADMIN_PASS"'' > /home/mediacms.io/mediacms/admin.txt
 
-
-# sudo sed -i 's/read -p "Enter portal URL/# read -p "Enter portal URL/g' /home/mediacms.io/mediacms/install.sh
-# sudo sed -i 's/read -p "Enter portal name/# read -p "Enter portal name/g' /home/mediacms.io/mediacms/install.sh
-# sudo sed -i 's/while true; do/while false; do/g' /home/mediacms.io/mediacms/install.sh
-
-# sudo bash ./install.sh
-
 echo '##### INSTALANDO O AWS CLI #####'
 
 cd /home/ubuntu
@@ -130,6 +158,6 @@ echo '############### Publicando SNS ################'
 
 echo Publicando SNS
 topic_arn="${sns_topic_arn}"
-aws sns publish --topic-arn $topic_arn --message "Implantação do Projeto finalizada."
+aws sns publish --topic-arn $topic_arn --message "Implantação do Projeto finalizada. Senha admin: $ADMIN_PASS"
 
 echo "################# FIM ###################"

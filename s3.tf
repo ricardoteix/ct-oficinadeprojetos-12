@@ -8,12 +8,6 @@ resource "aws_s3_bucket" "projeto-static" {
   }
 }
 
-# resource "aws_s3_bucket_acl" "projeto-static-acl" {
-#   bucket = aws_s3_bucket.projeto-static.id
-#   acl    = "private"
-# }
-
-
 resource "aws_s3_bucket_lifecycle_configuration" "projeto-static-config" {
   bucket = aws_s3_bucket.projeto-static.id
 
