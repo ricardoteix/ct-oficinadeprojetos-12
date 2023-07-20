@@ -1,5 +1,32 @@
 #!/bin/bash
 
+##############################################
+# Defina os valores para as variáveis abaixo #
+##############################################
+
+regiao="us-east-1"
+
+# Crie um banco de dados PostgresSQL com login, senha e nome 
+# do banco de dados como sendo 'mediacms'
+rds_addr="HOST do RDS"
+
+full_domain="localhost"
+
+# Criar credendiais com permissão para leitura e escrita bo bucket
+s3_user_id="KEY ID"
+s3_user_secret="SECRET KEY"
+
+s3_bucket_name="Nome do bucket"
+cloudfront_domain_name="Endereço da distribuição CloudFront"
+admin_email="Email do admin"
+
+# Criar credendiais de SMTP no SES
+smtp_user="Usuário do SMTP do SES"
+smtp_password="Password do SMTP do SES"
+smtp_host="email-smtp.${regiao}.amazonaws.com"
+
+############### Instalação #################
+
 sudo apt update
 sudo apt-get install postgresql-client -y
 sudo apt install s3fs -y
@@ -7,55 +34,26 @@ sudo apt install s3fs -y
 # Configura o s3fs
 mkdir -p /home/mediacms.io/mediacms/media_files
 cd /home/mediacms.io/mediacms
-# sudo systemctl stop mediacms celery_long celery_short
 
 # Cria o arquivo com as credenciais do S3
 echo '${s3_user_id}:${s3_user_secret}' > .passwd-s3fs
 chmod 600 .passwd-s3fs
 
-# mv media_files media_files_tmp
-# mkdir media_files
-
-# Verificar uid e gid
-# sudo cat /etc/passwd
-
 uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
 gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
 sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002 -o passwd_file=.passwd-s3fs
 
-# s3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs
-# mv media_files_tmp/hls media_files/hls
-# mv media_files_tmp/userlogos media_files/userlogos 
-# rm -rf media_files_tmp
-
-# sudo systemctl start mediacms celery_long celery_short
-
-# Removido por ja ter sido executado
-# sudo -H -u www-data bash -c 's3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs'
-
-# sudo mkdir /home/mediacms.io && cd /home/mediacms.io/
-# sudo git clone https://github.com/mediacms-io/mediacms
-# cd /home/mediacms.io/mediacms/
 cd /home/mediacms.io/mediacms
 sudo git init 
 sudo git remote add origin https://github.com/mediacms-io/mediacms
 sudo git pull origin main 
 
 # Define o endereço das mídias
-# sudo sed -i 's/MEDIA_URL = "/media/"/MEDIA_URL = "https://${cloudfront_domain_name}/"/g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = "https://${cloudfront_domain_name}/"#g' /home/mediacms.io/mediacms/cms/settings.py
-#sudo sed -i 's/HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")/HLS_DIR = "https://${cloudfront_domain_name}/hls/"/g' /home/mediacms.io/mediacms/cms/settings.py
-# sudo sed -i 's#HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")#HLS_DIR = "https://${cloudfront_domain_name}/hls/"#g' /home/mediacms.io/mediacms/cms/settings.py
-# sudo sed -i 's#240, 360#360, 720, 2160#g' /home/mediacms.io/mediacms/cms/settings.py
-
-# sudo sed -i 's#240, 360#360, 720, 2160#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Define os dados do EMAIL e SES
-
-echo "${sns_email} ${smtp_user} ${smtp_host}" > /home/mediacms.io/mediacms/ses.txt
-
 sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = "${smtp_user}"#g' /home/mediacms.io/mediacms/cms/settings.py
-sudo sed -i 's#info@mediacms.io#${sns_email}#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#info@mediacms.io#${admin_email}#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#xyz#${smtp_password}#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#EMAIL_HOST = "mediacms.io"#EMAIL_HOST = "${smtp_host}"#g' /home/mediacms.io/mediacms/cms/settings.py
 
@@ -166,18 +164,5 @@ chown -R www-data. /home/mediacms.io/
 echo 'MediaCMS installation completed, open browser on http://'"$FRONTEND_HOST"' and login with user admin and password '"$ADMIN_PASS"''
 
 echo 'O login do administrador é admin e a senha é '"$ADMIN_PASS"'' > /home/mediacms.io/mediacms/admin.txt
-
-echo '##### INSTALANDO O AWS CLI #####'
-
-cd /home/ubuntu
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-
-echo '############### Publicando SNS ################'
-
-echo Publicando SNS
-topic_arn="${sns_topic_arn}"
-aws sns publish --topic-arn $topic_arn --message "Implantação do Projeto finalizada. Senha admin: $ADMIN_PASS"
 
 echo "################# FIM ###################"
