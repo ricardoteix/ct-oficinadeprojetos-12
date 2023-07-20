@@ -143,3 +143,68 @@ resource "aws_security_group" "sg_projeto_elb" {
     Name = "sg-${var.tag-base}-elb"
   }
 }
+
+
+resource "aws_security_group" "sg_projeto_ses" {
+  name        = "sg_${var.tag-base}_ses"
+  description = "Allow web inbound traffic"
+  vpc_id      =  aws_vpc.vpc-projeto.id
+
+  ingress {
+    description      = "STARTTLS Port"
+    from_port        = 25
+    to_port          = 25
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    description      = "STARTTLS Port"
+    from_port        = 587
+    to_port          = 587
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    description      = "STARTTLS Port"
+    from_port        = 2587
+    to_port          = 2587
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    description      = "TLS Wrapper Port"
+    from_port        = 465
+    to_port          = 465
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    description      = "TLS Wrapper Port"
+    from_port        = 2465
+    to_port          = 2465
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "sg-${var.tag-base}-ses"
+  }
+
+}

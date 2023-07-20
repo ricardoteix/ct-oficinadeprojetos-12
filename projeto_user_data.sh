@@ -19,7 +19,9 @@ chmod 600 .passwd-s3fs
 # Verificar uid e gid
 # sudo cat /etc/passwd
 
-sudo s3fs ${s3_bucket_name} media_files -ouid=33,gid=33,allow_other,mp_umask=002 -o passwd_file=.passwd-s3fs
+uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
+gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
+sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002 -o passwd_file=.passwd-s3fs
 
 # s3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs
 # mv media_files_tmp/hls media_files/hls
@@ -28,7 +30,8 @@ sudo s3fs ${s3_bucket_name} media_files -ouid=33,gid=33,allow_other,mp_umask=002
 
 # sudo systemctl start mediacms celery_long celery_short
 
-sudo -H -u www-data bash -c 's3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs'
+# Removido por ja ter sido executado
+# sudo -H -u www-data bash -c 's3fs ${s3_bucket_name} media_files -o passwd_file=.passwd-s3fs'
 
 # sudo mkdir /home/mediacms.io && cd /home/mediacms.io/
 # sudo git clone https://github.com/mediacms-io/mediacms
@@ -39,11 +42,26 @@ sudo git remote add origin https://github.com/mediacms-io/mediacms
 sudo git pull origin main 
 
 # Define o endereço das mídias
-sudo sed -i 's/MEDIA_URL = "/media/"/MEDIA_URL = "https://${cloudfront_domain_name}/"/g' /home/mediacms.io/mediacms/cms/settings.py
-sudo sed -i 's/HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")/HLS_DIR = "https://${cloudfront_domain_name}/hls/"/g' /home/mediacms.io/mediacms/cms/settings.py
+# sudo sed -i 's/MEDIA_URL = "/media/"/MEDIA_URL = "https://${cloudfront_domain_name}/"/g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = "https://${cloudfront_domain_name}/"#g' /home/mediacms.io/mediacms/cms/settings.py
+#sudo sed -i 's/HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")/HLS_DIR = "https://${cloudfront_domain_name}/hls/"/g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#HLS_DIR = os.path.join(MEDIA_ROOT, "hls/")#HLS_DIR = "https://${cloudfront_domain_name}/hls/"#g' /home/mediacms.io/mediacms/cms/settings.py
+# sudo sed -i 's#240, 360#360, 720, 2160#g' /home/mediacms.io/mediacms/cms/settings.py
+
+# sudo sed -i 's#240, 360#360, 720, 2160#g' /home/mediacms.io/mediacms/cms/settings.py
+
+# Define os dados do EMAIL e SES
+sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = "${smtp_user}"#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#info@mediacms.io#${sns_email}#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#xyz#${smtp_password}#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#EMAIL_HOST = "mediacms.io"#EMAIL_HOST = "${smtp_host}"#g' /home/mediacms.io/mediacms/cms/settings.py
+
+# Localização
+sudo sed -i 's#en-us#pt-br#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#Europe/London#America/Recife#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Define as credenciais do banco
-sudo sed -i 's/"HOST": "127.0.0.1"/"HOST": "${rds_addr}"/g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": "${rds_addr}"#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Instalação
 echo "Welcome to the MediacMS installation!";
@@ -114,7 +132,6 @@ cp deploy/local_install/celery_long.service /etc/systemd/system/celery_long.serv
 cp deploy/local_install/celery_short.service /etc/systemd/system/celery_short.service && systemctl enable celery_short && systemctl start celery_short
 cp deploy/local_install/celery_beat.service /etc/systemd/system/celery_beat.service && systemctl enable celery_beat &&systemctl start celery_beat
 cp deploy/local_install/mediacms.service /etc/systemd/system/mediacms.service && systemctl enable mediacms.service && systemctl start mediacms.service
-
 
 mkdir -p /etc/letsencrypt/live/mediacms.io/
 mkdir -p /etc/letsencrypt/live/$FRONTEND_HOST

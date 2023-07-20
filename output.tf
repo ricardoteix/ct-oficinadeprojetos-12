@@ -69,3 +69,12 @@ output "domain" {
 output "cloudfront_domain_name" {
   value = aws_cloudfront_distribution.media_cloudfront.domain_name
 }
+
+output "smtp_username" {
+  value = aws_iam_access_key.smtp_user.id
+}
+
+output "smtp_password" {
+  value = aws_iam_access_key.smtp_user.ses_smtp_password_v4
+  sensitive = true
+}

@@ -11,7 +11,11 @@
     s3_user_id = aws_iam_access_key.s3_user_key.id,
     s3_user_secret = aws_iam_access_key.s3_user_key.secret,
     s3_bucket_name = var.nome-bucket,
-    cloudfront_domain_name = aws_cloudfront_distribution.media_cloudfront.domain_name
+    cloudfront_domain_name = aws_cloudfront_distribution.media_cloudfront.domain_name,
+    sns_email = var.sns-email,
+    smtp_user = aws_iam_user.smtp_user.id,
+    smtp_password = aws_iam_access_key.smtp_user.ses_smtp_password_v4,
+    smtp_host = "email-smtp.${var.regiao}.amazonaws.com"
   }
 }
 
