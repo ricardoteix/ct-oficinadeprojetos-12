@@ -78,3 +78,7 @@ output "smtp_password" {
   value = aws_iam_access_key.smtp_user.ses_smtp_password_v4
   sensitive = true
 }
+
+output "redis_endpoint" {
+    value = aws_elasticache_cluster.redis.cache_nodes.0.address
+}

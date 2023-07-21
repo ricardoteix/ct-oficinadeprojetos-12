@@ -15,7 +15,8 @@
     sns_email = var.sns-email,
     smtp_user = aws_iam_access_key.smtp_user.id,
     smtp_password = aws_iam_access_key.smtp_user.ses_smtp_password_v4,
-    smtp_host = "email-smtp.${var.regiao}.amazonaws.com"
+    smtp_host = "email-smtp.${var.regiao}.amazonaws.com",
+    redis_endpoint = aws_elasticache_cluster.redis.cache_nodes.0.address
   }
 }
 

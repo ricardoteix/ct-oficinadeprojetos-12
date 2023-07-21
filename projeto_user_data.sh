@@ -31,6 +31,10 @@ sudo sed -i 's#info@mediacms.io#${sns_email}#g' /home/mediacms.io/mediacms/cms/s
 sudo sed -i 's#xyz#${smtp_password}#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#EMAIL_HOST = "mediacms.io"#EMAIL_HOST = "${smtp_host}"#g' /home/mediacms.io/mediacms/cms/settings.py
 
+# Redis
+# REDIS_LOCATION = "redis://127.0.0.1:6379/1" 
+sudo sed -i 's#//127.0.0.1#//${redis_endpoint}#g' /home/mediacms.io/mediacms/cms/settings.py
+
 # Localização
 sudo sed -i 's#en-us#pt-br#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#Europe/London#America/Recife#g' /home/mediacms.io/mediacms/cms/settings.py
