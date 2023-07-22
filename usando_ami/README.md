@@ -35,7 +35,7 @@ Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.
     - Após a criação do *Node* um Endpoint ficará disponível com o formato similar a este: ``redis-projeto12-ami-nocluster-001.dpe5c4.0001.use1.cache.amazonaws.com``. Não especifique a porta, na variável redis_endpoint, apenas até o .com.
 - Criar Application Load Balancer e TargetGroup
 - Criar Domínio/Subdomínio no Route53 apontando para o Load Balancer
-- Criar na raiz do S3 o arquivo ``.env`` com todas as variáveis definidas com base no que foi criado.
+- Criar na raiz do S3 o arquivo ``.env`` com todas as variáveis definidas com base no que foi criado. O modelo deste arquivo está na pasta ``usando_ami/subir_para_bucket`` deste repositório.
 - Criar o EC2 com base na AMI XXXXX e usar o modelo do arquivo ``image_user_data.sh`` com as devidas variáveis ataulizadas para o Advanced details : User data.
     - Precisa ser no mínimo t3a.small
     - Variáveis para atualizar no arquivo: 
