@@ -43,3 +43,15 @@ override.tf.json
 # example: *tfplan*
 
 .terraform.lock.hcl
+
+*.pem
+
+__pycache__
+env
+
+locust-load-test/
+image_user_data_teste.sh
+
+*copy*
+
+usando_ami/
