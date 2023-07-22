@@ -9,12 +9,40 @@ mkdir -p /home/mediacms.io/mediacms/media_files
 cd /home/mediacms.io/mediacms
 
 # Cria o arquivo com as credenciais do S3
-echo '${s3_user_id}:${s3_user_secret}' > .passwd-s3fs
-chmod 600 .passwd-s3fs
+sudo su -c "echo ${s3_user_id}:${s3_user_secret} > /etc/passwd-s3fs"
+sudo su -c "chmod 400 /etc/passwd-s3fs"
 
+# echo '${s3_user_id}:${s3_user_secret}' > .passwd-s3fs
+# chmod 600 .passwd-s3fs
+
+# Buscar o id do usuario e id do grupo
 uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
 gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
-sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002 -o passwd_file=.passwd-s3fs
+sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002
+
+# Define as variáveis de ambiente
+sudo su -c "echo region=${region} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo sns_topic_arn=${sns_topic_arn} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo rds_addr=${rds_addr} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo full_domain=${full_domain} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo s3_user_id=${s3_user_id} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo s3_user_secret=${s3_user_secret} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo s3_bucket_name=${s3_bucket_name} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo cloudfront_domain_name=${cloudfront_domain_name} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo sns_email=${sns_email} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo smtp_user=${smtp_user} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo smtp_password=${smtp_password} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo smtp_host=${smtp_host} >> /home/mediacms.io/mediacms/media_files/.env"
+sudo su -c "echo redis_endpoint=${redis_endpoint} >> /home/mediacms.io/mediacms/media_files/.env"
+# suso su -c "source /etc/environment"
+
+# Define o arquivo padrão das credenciais do s3fs.
+# Usando para montar ao inicializar a máquina
+# sudo cp .passwd-s3fs /etc/passwd-s3fs
+# sudo chmod 400 /etc/passwd-s3fs
+
+# Registra no fstab o código para montar o s3fs ao inicializar
+sudo su -c "echo ${s3_bucket_name} /home/mediacms.io/mediacms/media_files fuse.s3fs _netdev,uid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002  0 0 >> /etc/fstab"
 
 # Baixando o projeto
 cd /home/mediacms.io/mediacms
@@ -22,25 +50,32 @@ sudo git init
 sudo git remote add origin https://github.com/mediacms-io/mediacms
 sudo git pull origin main 
 
-# Define o endereço das mídias
-sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = "https://${cloudfront_domain_name}/"#g' /home/mediacms.io/mediacms/cms/settings.py
+# Instala dependencia do Python para variáveis de ambiente
+echo "python-dotenv==1.0.0" >> requirements.txt
+
+# Usar dotenv para inserir os variáveis no código
+sed -i '/DEBUG = False/c\DEBUG = False\n\nfrom dotenv import load_dotenv\nload_dotenv("/home/mediacms.io/mediacms/media_files/.env")' /home/mediacms.io/mediacms/cms/settings.py
+
+# Define o endereço das mídias. Usar com https
+# sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = "https://${cloudfront_domain_name}/"#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = f"https://{os.getenv(\"cloudfront_domain_name\")}/"#g' settings.py
 
 # Define os dados do EMAIL e SES
-sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = "${smtp_user}"#g' /home/mediacms.io/mediacms/cms/settings.py
-sudo sed -i 's#info@mediacms.io#${sns_email}#g' /home/mediacms.io/mediacms/cms/settings.py
-sudo sed -i 's#xyz#${smtp_password}#g' /home/mediacms.io/mediacms/cms/settings.py
-sudo sed -i 's#EMAIL_HOST = "mediacms.io"#EMAIL_HOST = "${smtp_host}"#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = os.getenv("smtp_user")#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#"info@mediacms.io"#os.getenv("sns_email")#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#"xyz"#os.getenv("smtp_password")#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#EMAIL_HOST = "mediacms.io"#EMAIL_HOST = os.getenv("smtp_host")#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Redis
-# REDIS_LOCATION = "redis://127.0.0.1:6379/1" 
-sudo sed -i 's#//127.0.0.1#//${redis_endpoint}#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#//127.0.0.1#//"+os.getenv("redis_endpoint")+"#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Localização
 sudo sed -i 's#en-us#pt-br#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#Europe/London#America/Recife#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Define as credenciais do banco
-sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": "${rds_addr}"#g' /home/mediacms.io/mediacms/cms/settings.py
+# sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": "${rds_addr}"#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": os.getenv("rds_addr")#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Instalação do MediacMS
 echo "Welcome to the MediacMS installation!";
@@ -101,7 +136,8 @@ python manage.py loaddata fixtures/encoding_profiles.json
 python manage.py loaddata fixtures/categories.json
 python manage.py collectstatic --noinput
 
-ADMIN_PASS=`python -c "import secrets;chars = 'abcdefghijklmnopqrstuvwxyz0123456789';print(''.join(secrets.choice(chars) for i in range(10)))"`
+# ADMIN_PASS=`python -c "import secrets;chars = 'abcdefghijklmnopqrstuvwxyz0123456789';print(''.join(secrets.choice(chars) for i in range(10)))"`
+ADMIN_PASS=adm2023cms
 echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
 
 echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
