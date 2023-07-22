@@ -16,7 +16,7 @@ Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.
 - Criar o bucket informado no ``s3_bucket_name``
     - Crie uma pasta chamada **hls** no bucket
     - Crie uma pasta chamada **userlogos** no bucket
-    - Envie as imagens **banner.jpg** e **user.jpg** para a pasta **userlogos**
+    - Envie as imagens **banner.jpg** e **user.jpg** para a pasta **userlogos**. As imagens estão na pasta ``usando_ami/subir_para_bucket`` deste repositório.
 - Criar CloudFront:
     - *Origin domain origem* sendo o ``s3_bucket_name``
     - *Origin access* como *Legacy access identities*
