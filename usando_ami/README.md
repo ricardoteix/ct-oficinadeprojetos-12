@@ -5,7 +5,7 @@ Para subir o Media CMS publicamos uma AMI com diversas pré-configurações.
 No [AMI Catalog](https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-east-1#AMICatalog:) se você procurar por "projeto12" você de encontrar a AMI 
 
 ```
-ct-projeto12-mediacms
+ct-projeto12-mediacms 
 ami-0230a8d89aa340613
 ```
 
@@ -36,7 +36,7 @@ Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.
 - Criar Application Load Balancer e TargetGroup
 - Criar Domínio/Subdomínio no Route53 apontando para o Load Balancer
 - Criar na raiz do S3 o arquivo ``.env`` com todas as variáveis definidas com base no que foi criado. O modelo deste arquivo está na pasta ``usando_ami/subir_para_bucket`` deste repositório.
-- Criar o EC2 com base na AMI XXXXX e usar o modelo do arquivo ``image_user_data.sh`` com as devidas variáveis ataulizadas para o Advanced details : User data.
+- Criar o EC2 com base na AMI **ct-projeto12-mediacms (ami-0230a8d89aa340613)** e usar o modelo do arquivo ``image_user_data.sh`` com as devidas variáveis ataulizadas para o Advanced details : User data.
     - Precisa ser no mínimo t3a.small
     - Variáveis para atualizar no arquivo: 
         - ``s3_user_id``
