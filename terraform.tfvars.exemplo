@@ -46,7 +46,7 @@ tag-base = "projeto12"
 # Especifique o nome da chave pem para associar a instância
 ec2-chave-instancia = "nome_chave_pem"
 
-ec2-tamanho-ebs = 20
+ec2-tamanho-ebs = 8
 
 # Especifique o nome do arquivo para carregar no user_data
 # caso deseje um diferente do padrão.
