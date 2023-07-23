@@ -15,6 +15,12 @@ sudo su -c "chmod 400 /etc/passwd-s3fs"
 # echo '${s3_user_id}:${s3_user_secret}' > .passwd-s3fs
 # chmod 600 .passwd-s3fs
 
+# Se não for usar s3fs pode montar o Storage File Gateway com os passos:
+# - Definir o Squash level: No root squash
+# - mount -t nfs -o nolock,hard IP_DO_GATEWAY:/NOME_BUCKET media_files
+# - chown -R www-data:www-data media_files
+# - chmod -R 755 media_files
+
 # Buscar o id do usuario e id do grupo
 uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
 gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
