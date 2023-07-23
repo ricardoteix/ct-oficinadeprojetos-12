@@ -135,6 +135,9 @@ Mesmo proporcionando a criação dos recursos mínimos para execução do projet
 
 # Referências
 
+1. [Media CMS](https://github.com/mediacms-io/mediacms/)
+1. [Media CMS - Server Installation](https://github.com/mediacms-io/mediacms/blob/main/docs/admins_docs.md#2-server-installation)
+1. [Media CMS - Configuration](https://github.com/mediacms-io/mediacms/blob/main/docs/admins_docs.md#5-configuration)
+1. [AWS Storage Gateway](https://aws.amazon.com/pt/storagegateway/)
 1. [Terraform](https://www.terraform.io/)
-2. [How to setup a basic VPC with EC2 and RDS using Terraform](https://dev.to/rolfstreefkerk/how-to-setup-a-basic-vpc-with-ec2-and-rds-using-terraform-3jij)
-3. [Variáveis Terraform para Packer](https://stackoverflow.com/questions/58054772/how-to-set-a-packer-variable-from-a-terraform-state)
+1. [How to setup a basic VPC with EC2 and RDS using Terraform](https://dev.to/rolfstreefkerk/how-to-setup-a-basic-vpc-with-ec2-and-rds-using-terraform-3jij)
