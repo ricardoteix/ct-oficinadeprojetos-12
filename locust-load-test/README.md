@@ -2,11 +2,13 @@
 
 É preciso ter o Python 3.9 ou superior instalado na máquina. 
 
-## Crie um ambiente virtual na pasta **locust-load-test**:
+## Preparando o ambiente
+
+### Crie um ambiente virtual na pasta **locust-load-test**:
 
 ```D:\projeto\locust-load-test> python -m venv env```
 
-## Ative o ambiente criado:
+### Ative o ambiente criado:
 
 *Windows*
 
@@ -15,6 +17,14 @@
 *Linux*
 
 ```~/projeto/locust-load-test> source env/bin/activate```
+
+### Instale as dependências
+
+É preciso instalar as dependências do Python para o Locust.
+
+Execute ocomando seguinte.
+
+```D:\projeto\locust-load-test> pip install -r requirements.txt```
 
 ## Inicie o locust
 
