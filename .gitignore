@@ -2,6 +2,8 @@
 temp/
 *copy*
 *bkp
+.infracost/
+
 # Packer
 
 image/
@@ -49,7 +51,6 @@ override.tf.json
 __pycache__
 env
 
-locust-load-test/
 image_user_data_teste.sh
 
 *copy*
