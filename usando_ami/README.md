@@ -5,8 +5,8 @@ Para subir o Media CMS publicamos uma AMI com diversas pré-configurações.
 No [AMI Catalog](https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-east-1#AMICatalog:) se você procurar por "projeto12" você de encontrar a AMI 
 
 ```
-ct-projeto12-mediacms 
-ami-0230a8d89aa340613
+ct-projeto12-mediacms-v2
+ami-028a8210e4ccd79b6
 ```
 
 Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.
