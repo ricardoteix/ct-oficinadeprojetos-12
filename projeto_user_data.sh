@@ -57,8 +57,8 @@ sudo git remote add origin https://github.com/mediacms-io/mediacms
 sudo git pull origin main 
 
 # Download do banner e imagem do usuario (logo) padrao
-wget -P /home/mediacms.io/mediacms/media_files https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/banner.jpg
-wget -P /home/mediacms.io/mediacms/media_files https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/user.jpg
+wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/banner.jpg
+wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/user.jpg
 
 # Instala dependencia do Python para variáveis de ambiente
 echo "python-dotenv==1.0.0" >> requirements.txt
