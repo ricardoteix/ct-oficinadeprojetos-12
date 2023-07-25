@@ -56,6 +56,10 @@ sudo git init
 sudo git remote add origin https://github.com/mediacms-io/mediacms
 sudo git pull origin main 
 
+# Download do banner e imagem do usuario (logo) padrao
+wget -P /home/mediacms.io/mediacms/media_files https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/banner.jpg
+wget -P /home/mediacms.io/mediacms/media_files https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/user.jpg
+
 # Instala dependencia do Python para variáveis de ambiente
 echo "python-dotenv==1.0.0" >> requirements.txt
 
@@ -78,6 +82,9 @@ sudo sed -i 's#//127.0.0.1#//"+os.getenv("redis_endpoint")+"#g' /home/mediacms.i
 # Localização
 sudo sed -i 's#en-us#pt-br#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#Europe/London#America/Recife#g' /home/mediacms.io/mediacms/cms/settings.py
+
+# Tema
+sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Define as credenciais do banco
 # sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": "${rds_addr}"#g' /home/mediacms.io/mediacms/cms/settings.py
@@ -177,6 +184,12 @@ cd /home/mediacms.io/mediacms
 wget http://zebulon.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-637.x86_64-unknown-linux.zip
 unzip Bento4-SDK-1-6-0-637.x86_64-unknown-linux.zip
 mkdir /home/mediacms.io/mediacms/media_files/hls
+
+
+# Criando arquivo que define que para estas configuracoes, uma instalacao ja existe
+# Se outra instancis iniciar, ela deve verificar se este arquivo existe para que
+# nao inicialize o banco de dados novamente.
+sudo su -c "echo started > /home/mediacms.io/mediacms/media_files/started.info"
 
 # last, set default owner
 chown -R www-data. /home/mediacms.io/
