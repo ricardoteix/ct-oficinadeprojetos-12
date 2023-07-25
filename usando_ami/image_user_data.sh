@@ -28,7 +28,7 @@ sudo su -c "sed -i '/^s3_bucket_name=/d' /etc/environment"
 sudo su -c "echo s3_user_id=${s3_user_id} >> /etc/environment"
 sudo su -c "echo s3_user_secret=${s3_user_secret} >> /etc/environment"
 sudo su -c "echo s3_bucket_name=${s3_bucket_name} >> /etc/environment"
-suso su -c "source /etc/environment"
+sudo su -c "source /etc/environment"
 source /etc/environment
 
 # Define o arquivo padrao das credenciais do s3fs
@@ -48,12 +48,20 @@ sudo su -c "echo ${s3_bucket_name} /home/mediacms.io/mediacms/media_files fuse.s
 # Desmonta
 sudo su -c "umount media_files"
 cd /home/mediacms.io/mediacms/
-sudo mv media_files/userlogos/ ./userlogos/
-sudo rm -rf /home/mediacms.io/mediacms/media_files
-mkdir -p /home/mediacms.io/mediacms/media_files
+# sudo mv media_files/userlogos/ ./userlogos/
+# sudo rm -rf /home/mediacms.io/mediacms/media_files
+# mkdir -p /home/mediacms.io/mediacms/media_files
 cd /home/mediacms.io/mediacms
 sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002
-sudo mv ./userlogos/ ./media_files/userlogos/
+# sudo mv ./userlogos/ ./media_files/userlogos/
+
+# Caminho do arquivo que indica que uma implantacao ja foi realizada
+file=/home/mediacms.io/mediacms/media_files/started.info
+
+if [ -f "$file" ]
+then
+
+sudo su -c "echo started > /home/mediacms.io/mediacms/media_files/started.info"
 
 # Limpando o Banco
 export PGHOST=$rds_addr
@@ -82,6 +90,17 @@ python manage.py collectstatic --noinput
 ADMIN_PASS=adm2023cms
 echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
 echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
+
+else
+
+echo "##############################"
+echo "# Banco de dados incializado #"
+echo "##############################"
+
+fi
+
+# Tema
+sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
 
 systemctl restart nginx mediacms celery_long celery_short
 
