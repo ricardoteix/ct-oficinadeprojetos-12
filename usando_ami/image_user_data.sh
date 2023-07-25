@@ -61,6 +61,12 @@ file=/home/mediacms.io/mediacms/media_files/started.info
 if [ -f "$file" ]
 then
 
+echo "##############################"
+echo "# Banco de dados incializado #"
+echo "##############################"
+
+else
+
 sudo su -c "echo started > /home/mediacms.io/mediacms/media_files/started.info"
 
 # Limpando o Banco
@@ -90,12 +96,6 @@ python manage.py collectstatic --noinput
 ADMIN_PASS=adm2023cms
 echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
 echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
-
-else
-
-echo "##############################"
-echo "# Banco de dados incializado #"
-echo "##############################"
 
 fi
 
