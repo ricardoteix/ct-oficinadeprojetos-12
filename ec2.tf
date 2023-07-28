@@ -20,6 +20,28 @@
   }
 }
 
+locals {
+  full_domain = var.has-domain ? "${var.domain}.${var.hosted_zone_name}" : "localhost"
+}
+
+resource "local_file" "dot_env" {
+    content  = <<-EOT
+region=${var.regiao}
+full_domain=${local.full_domain}
+s3_user_id=${aws_iam_access_key.s3_user_key.id}
+s3_user_secret=${aws_iam_access_key.s3_user_key.secret}
+s3_bucket_name=${var.nome-bucket}
+rds_addr=${aws_db_instance.projeto-rds.address}
+cloudfront_domain_name=${aws_cloudfront_distribution.media_cloudfront.domain_name}
+sns_email=${var.sns-email}
+smtp_user=${aws_iam_access_key.smtp_user.id}
+smtp_password=${aws_iam_access_key.smtp_user.ses_smtp_password_v4}
+smtp_host=email-smtp.${var.regiao}.amazonaws.com
+redis_endpoint=${aws_elasticache_cluster.redis.cache_nodes.0.address}
+    EOT
+    filename = "${path.module}/usando_ami/.env"
+}
+
 # Criando uma instância EC2
 resource "aws_instance" "projeto" {
   ami = var.ec2-ami

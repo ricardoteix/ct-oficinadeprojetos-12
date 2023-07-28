@@ -24,3 +24,24 @@ resource "aws_s3_bucket_lifecycle_configuration" "projeto-static-config" {
   }
 
 }
+
+
+# Enviando .env ao S3
+resource "random_string" "random_etag" {
+  length  = 6
+  special = false
+  upper   = true
+  lower   = true
+  numeric  = true
+}
+
+resource "aws_s3_bucket_object" "file_upload" {
+  bucket = var.nome-bucket
+  key    = ".env"
+  source = "${path.module}/usando_ami/.env"
+  etag   = "${random_string.random_etag.result}"
+  
+  depends_on = [ 
+    local_file.dot_env
+  ]
+}

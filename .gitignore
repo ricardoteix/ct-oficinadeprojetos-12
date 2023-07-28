@@ -50,6 +50,7 @@ override.tf.json
 
 __pycache__
 env
+.env
 
 image_user_data_teste.sh
 

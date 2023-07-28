@@ -49,5 +49,17 @@ ec2-chave-instancia = "nome_chave_pem"
 ec2-tamanho-ebs = 8
 
 # Especifique o nome do arquivo para carregar no user_data
-# caso deseje um diferente do padrão.
-arquivo-user-data = "projeto_user_data.sh"
+# caso deseje um diferente do padrão que está na raiz
+# deste repositório, projeto_user_data.sh.
+
+# Especificando novo arquivo para usar no user_data
+# da AMI do projeto ct-projeto12-mediacms-v2 (ami-028a8210e4ccd79b6)
+# Obs: Não especifique esta variável se a AMI do projeto
+# não estiver mais disponível publicamente.
+arquivo-user-data = "usando_ami/image_user_data.sh"
+
+# AMI do projeto: ct-projeto12-mediacms-v2 (ami-028a8210e4ccd79b6)
+# Caso não seja definida será usada a do Ubuntu 20
+# Obs: Não especifique esta variável se a AMI do projeto
+# não estiver mais disponível publicamente.
+ec2-ami = "ami-028a8210e4ccd79b6"

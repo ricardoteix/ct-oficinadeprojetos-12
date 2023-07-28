@@ -2,6 +2,9 @@
 
 ##############################################
 # Defina os valores para as variaveis abaixo #
+#                                            # 
+# Por exemplo, troque o  ${s3_bucket_name}   # 
+# pelo nome do bucket.                       # 
 ##############################################
 
 # OBS: A senha do usuario admin e adm2023cms
@@ -10,10 +13,10 @@ echo "# Senha do admin: adm2023cms #"
 echo "##############################"
 
 # Criar credendiais com permissao para leitura e escrita bo bucket
-s3_user_id=KEY ID
-s3_user_secret=SECRET KEY
-s3_bucket_name=Nome do bucket
-rds_addr=Endereço do RDS
+s3_user_id=${s3_user_id}
+s3_user_secret=${s3_user_secret}
+s3_bucket_name=${s3_bucket_name}
+rds_addr=${rds_addr}
 
 ##############################
 # Nao mexer daqui para baixo #
@@ -102,6 +105,16 @@ fi
 # Tema
 sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
 
+
+# Download do banner e imagem do usuario (logo) padrao
+mkdir -p /home/mediacms.io/mediacms/media_files/hls
+mkdir -p /home/mediacms.io/mediacms/media_files/userlogos
+wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/banner.jpg
+wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/user.jpg
+
+
 systemctl restart nginx mediacms celery_long celery_short
 
-
+echo "######################"
+echo "# Fim da Implantacao #"
+echo "######################"
