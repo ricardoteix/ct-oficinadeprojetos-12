@@ -33,7 +33,7 @@ EOF
 }
 
 
-# IAM Role # aws_efs_file_system.projeto-efs.arn
+# IAM Role 
 resource "aws_iam_role" "projeto-role" {
   name = "${var.tag-base}-role"
 

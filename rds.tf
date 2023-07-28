@@ -19,7 +19,7 @@ resource "aws_db_instance" "projeto-rds" {
   engine               = "postgres"
   engine_version       = "15.2"
   instance_class       = var.rds-tipo-instancia
-  name                 = var.rds-nome-banco # Nome do schema criado inicialmente para usar no projeto
+  db_name              = var.rds-nome-banco # Nome do schema criado inicialmente para usar no projeto
   username             = var.rds-nome-usuario
   password             = var.rds-senha-usuario
   # parameter_group_name = "default.mysql8.0"

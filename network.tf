@@ -145,8 +145,8 @@ resource "aws_main_route_table_association" "rt-projeto-assoc-main" {
 
 # Criando Network Interface
 resource "aws_network_interface" "nic-projeto-instance" {
-  subnet_id       = aws_subnet.sn-projeto-public-1.id
-  private_ips     = ["10.0.0.50"]
+  subnet_id       = aws_subnet.sn-projeto-private-1.id
+  private_ips     = ["10.0.3.50"]
   security_groups = [aws_security_group.sg_projeto_web.id]
 
   # Pode relacionar a instância na criação do nic, mas pode ser feito depois na instância

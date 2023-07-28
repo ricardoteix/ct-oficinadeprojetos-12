@@ -1,17 +1,17 @@
 
 # Exibindo dados no console após criaçao
 
-output "projeto-id" {
-  value = aws_instance.projeto.id
-}
+# output "projeto-id" {
+#   value = aws_instance.projeto.id
+# }
 
-output "projeto-dns" {
-  value = aws_instance.projeto.public_dns
-}
+# output "projeto-dns" {
+#   value = aws_instance.projeto.public_dns
+# }
 
-output "projeto-ip" {
-  value = aws_instance.projeto.public_ip
-}
+# output "projeto-ip" {
+#   value = aws_instance.projeto.public_ip
+# }
 
 output "elb-dns" {
   value = aws_lb.projeto-elb.dns_name
@@ -37,13 +37,13 @@ output "projeto-rds-host" {
   value = aws_db_instance.projeto-rds.address
 }
 
-output "server" {
-  value = "http://${aws_instance.projeto.public_dns}/info.php"
-}
+# output "server" {
+#   value = "http://${aws_instance.projeto.public_dns}/info.php"
+# }
 
-output "projeto-efs_id" {
-  value = aws_efs_file_system.projeto-efs.id
-}
+# output "projeto-efs_id" {
+#   value = aws_efs_file_system.projeto-efs.id
+# }
 
 output "nome-bucket" {
   value = var.nome-bucket
@@ -81,4 +81,16 @@ output "smtp_password" {
 
 output "redis_endpoint" {
     value = aws_elasticache_cluster.redis.cache_nodes.0.address
+}
+
+output "ec2_conn_dns_name" {
+    value = aws_ec2_instance_connect_endpoint.ec2_conn.dns_name
+}
+
+output "ec2_conn_arn" {
+    value = aws_ec2_instance_connect_endpoint.ec2_conn.arn
+}
+
+output "ec2-instance-conn" {
+  value = "aws ec2-instance-connect ssh --instance-id EC2_ID --profile ${var.profile} --os-user ubuntu"
 }

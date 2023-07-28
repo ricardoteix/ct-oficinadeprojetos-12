@@ -3,7 +3,7 @@
  data "template_file" "projeto-user-data-script" {
   template = file(var.arquivo-user-data)
   vars = {
-    efs_id = aws_efs_file_system.projeto-efs.id
+    # efs_id = aws_efs_file_system.projeto-efs.id
     region = "${var.regiao}",
     sns_topic_arn = aws_sns_topic.projeto-events.arn,
     rds_addr = aws_db_instance.projeto-rds.address,
@@ -43,36 +43,36 @@ redis_endpoint=${aws_elasticache_cluster.redis.cache_nodes.0.address}
 }
 
 # Criando uma instância EC2
-resource "aws_instance" "projeto" {
-  ami = var.ec2-ami
-  instance_type = "${var.ec2-tipo-instancia}"
-  availability_zone = "${var.regiao}a"
-  key_name = "${var.ec2-chave-instancia}"
+# resource "aws_instance" "projeto" {
+#   ami = var.ec2-ami
+#   instance_type = "${var.ec2-tipo-instancia}"
+#   availability_zone = "${var.regiao}a"
+#   key_name = "${var.ec2-chave-instancia}"
 
-  iam_instance_profile = aws_iam_instance_profile.projeto-profile.name
+#   iam_instance_profile = aws_iam_instance_profile.projeto-profile.name
 
-  network_interface {
-    device_index = 0 # ordem da interface 
-    network_interface_id = aws_network_interface.nic-projeto-instance.id
-  }
+#   network_interface {
+#     device_index = 0 # ordem da interface 
+#     network_interface_id = aws_network_interface.nic-projeto-instance.id
+#   }
 
-  # EBS root
-  root_block_device {
-    volume_size = var.ec2-tamanho-ebs
-    volume_type = "gp2"
-  }
+#   # EBS root
+#   root_block_device {
+#     volume_size = var.ec2-tamanho-ebs
+#     volume_type = "gp2"
+#   }
 
-  # Script para execução na primeira inicialização.
-  # Usado para instalar o projeto
-  # user_data = file("projeto_user_data.sh")
+#   # Script para execução na primeira inicialização.
+#   # Usado para instalar o projeto
+#   # user_data = file("projeto_user_data.sh")
 
-  # Usando renderização do arquivo pelo template_file
-  user_data = data.template_file.projeto-user-data-script.rendered  
+#   # Usando renderização do arquivo pelo template_file
+#   user_data = data.template_file.projeto-user-data-script.rendered  
 
-  tags = {
-      Name = "${var.tag-base}"
-  }
-}
+#   tags = {
+#       Name = "${var.tag-base}"
+#   }
+# }
 
 resource "aws_lb" "projeto-elb" {
   name               = "projeto-lb"
@@ -107,14 +107,18 @@ resource "aws_lb_target_group" "tg-projeto" {
       path                = var.health_check["path"]
       port                = var.health_check["port"]
   }
+  stickiness {
+    type = "app_cookie"
+    cookie_name = "csrftoken"
+  }
 }
 
 # Attach the target group for "test" ALB
-resource "aws_lb_target_group_attachment" "tg_attachment_projeto-elb" {
-    target_group_arn = aws_lb_target_group.tg-projeto.arn
-    target_id        = aws_instance.projeto.id
-    port             = 80
-}
+# resource "aws_lb_target_group_attachment" "tg_attachment_projeto-elb" {
+#     target_group_arn = aws_lb_target_group.tg-projeto.arn
+#     target_id        = aws_instance.projeto.id
+#     port             = 80
+# }
 
 # Listener rule for HTTP traffic on each of the ALBs
 resource "aws_lb_listener" "lb_listener_http" {

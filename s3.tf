@@ -35,7 +35,7 @@ resource "random_string" "random_etag" {
   numeric  = true
 }
 
-resource "aws_s3_bucket_object" "file_upload" {
+resource "aws_s3_object" "env_upload" {
   bucket = var.nome-bucket
   key    = ".env"
   source = "${path.module}/usando_ami/.env"
@@ -45,3 +45,26 @@ resource "aws_s3_bucket_object" "file_upload" {
     local_file.dot_env
   ]
 }
+
+resource "aws_s3_object" "banner_upload" {
+  bucket = var.nome-bucket
+  key    = "userlogos/banner.jpg"
+  source = "${path.module}/usando_ami/subir_para_bucket/userlogos/banner.jpg"
+  etag   = "${random_string.random_etag.result}"
+}
+
+resource "aws_s3_object" "user_upload" {
+  bucket = var.nome-bucket
+  key    = "userlogos/user.jpg"
+  source = "${path.module}/usando_ami/subir_para_bucket/userlogos/user.jpg"
+  etag   = "${random_string.random_etag.result}"
+}
+
+resource "aws_s3_object" "hls_upload" {
+  bucket = var.nome-bucket
+  key    = "hls/placeholder.txt"
+  source = "${path.module}/usando_ami/subir_para_bucket/hls/placeholder.txt"
+  etag   = "${random_string.random_etag.result}"
+}
+
+

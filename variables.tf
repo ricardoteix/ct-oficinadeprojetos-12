@@ -50,6 +50,24 @@ variable "ec2-tamanho-ebs" {
   default     = 8
 }
 
+variable "autoscaling-min" {
+  description = "Quantidade mínima de instâncias"
+  type        = number
+  default     = 1
+}
+
+variable "autoscaling-max" {
+  description = "Quantidade máxima de instâncias"
+  type        = number
+  default     = 1
+}
+
+variable "autoscaling-desejado" {
+  description = "Quantidade desejada de instâncias"
+  type        = number
+  default     = 1
+}
+
 variable "arquivo-user-data" {
   description = "Script que será executado ao subir a instância"
   type        = string

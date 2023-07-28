@@ -4,12 +4,12 @@ import os
 
 class OpenProject(HttpUser):
 
-    host = 'https://mediacms.projeto12.com.br'
+    host = 'https://mediacms.eldoom.tk'
         
     @task(2)
     def view_video(self):
         
-        end_point = "/view?m=FmmEZLX48"
+        end_point = "/view?m=fLDjpZGTO"
         self.client.get(f"{end_point}")
         
     @task(3)

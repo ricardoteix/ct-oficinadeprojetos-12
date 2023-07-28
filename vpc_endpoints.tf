@@ -17,10 +17,36 @@ resource "aws_vpc_endpoint" "ses_endpoint" {
   vpc_endpoint_type   = "Interface"
 
   private_dns_enabled = true
-  security_group_ids  = [aws_security_group.sg_projeto_ses.id]
+  security_group_ids  = [aws_security_group.sg_projeto_cache.id]
   subnet_ids          = [aws_subnet.sn-projeto-private-2.id]  # Select the appropriate private subnet
 
   tags = {
     Name = "${var.tag-base}-ses-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint" "ecr_endpoint_elasticache" {
+  vpc_id              = aws_vpc.vpc-projeto.id
+  service_name        = "com.amazonaws.${var.regiao}.elasticache"
+  vpc_endpoint_type   = "Interface"
+
+  private_dns_enabled = true
+  security_group_ids  = [aws_security_group.sg_projeto_cache.id]
+  subnet_ids          = [
+    aws_subnet.sn-projeto-private-1.id,
+    aws_subnet.sn-projeto-private-2.id,
+    aws_subnet.sn-projeto-private-3.id,
+  ]
+
+  tags = {
+    Name = "${var.tag-base}-elasticache-endpoint"
+  }
+}
+
+resource "aws_ec2_instance_connect_endpoint" "ec2_conn" {
+  subnet_id = aws_subnet.sn-projeto-private-1.id
+
+  tags = {
+    Name = "${var.tag-base}-ec2-conn-endpoint"
   }
 }
