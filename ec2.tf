@@ -145,10 +145,3 @@ resource "aws_lb_listener" "lb_listner_https" {
     target_group_arn = aws_lb_target_group.tg-projeto.arn
   }
 }
-
-# resource "aws_ec2_instance_connect_endpoint" "conn" {
-#   subnet_id = aws_subnet.sn-projeto-private-1.id
-#   security_group_ids = [
-#     aws_security_group.sg_projeto_web.id
-#   ]
-# }

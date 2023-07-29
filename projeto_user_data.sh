@@ -186,7 +186,7 @@ unzip Bento4-SDK-1-6-0-637.x86_64-unknown-linux.zip
 mkdir /home/mediacms.io/mediacms/media_files/hls
 
 
-# Criando arquivo que define que para estas configuracoes, uma instalacao ja existe
+# Criando arquivo que define que, para estas configuracoes, uma instalacao ja existe.
 # Se outra instancis iniciar, ela deve verificar se este arquivo existe para que
 # nao inicialize o banco de dados novamente.
 sudo su -c "echo started > /home/mediacms.io/mediacms/media_files/started.info"
