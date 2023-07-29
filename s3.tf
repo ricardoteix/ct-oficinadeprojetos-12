@@ -42,7 +42,8 @@ resource "aws_s3_object" "env_upload" {
   etag   = "${random_string.random_etag.result}"
   
   depends_on = [ 
-    local_file.dot_env
+    local_file.dot_env,
+    aws_s3_bucket.projeto-static
   ]
 }
 
@@ -51,6 +52,10 @@ resource "aws_s3_object" "banner_upload" {
   key    = "userlogos/banner.jpg"
   source = "${path.module}/usando_ami/subir_para_bucket/userlogos/banner.jpg"
   etag   = "${random_string.random_etag.result}"
+  
+  depends_on = [ 
+    aws_s3_bucket.projeto-static
+  ]
 }
 
 resource "aws_s3_object" "user_upload" {
@@ -58,6 +63,10 @@ resource "aws_s3_object" "user_upload" {
   key    = "userlogos/user.jpg"
   source = "${path.module}/usando_ami/subir_para_bucket/userlogos/user.jpg"
   etag   = "${random_string.random_etag.result}"
+  
+  depends_on = [ 
+    aws_s3_bucket.projeto-static
+  ]
 }
 
 resource "aws_s3_object" "hls_upload" {
@@ -65,6 +74,10 @@ resource "aws_s3_object" "hls_upload" {
   key    = "hls/placeholder.txt"
   source = "${path.module}/usando_ami/subir_para_bucket/hls/placeholder.txt"
   etag   = "${random_string.random_etag.result}"
+  
+  depends_on = [ 
+    aws_s3_bucket.projeto-static
+  ]
 }
 
 
