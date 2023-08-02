@@ -76,6 +76,10 @@ sudo sed -i 's#"info@mediacms.io"#os.getenv("sns_email")#g' /home/mediacms.io/me
 sudo sed -i 's#"xyz"#os.getenv("smtp_password")#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#EMAIL_HOST = "mediacms.io"#EMAIL_HOST = os.getenv("smtp_host")#g' /home/mediacms.io/mediacms/cms/settings.py
 
+sudo sed -i 's#GLOBAL_LOGIN_REQUIRED = False#GLOBAL_LOGIN_REQUIRED = True#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#UPLOAD_MEDIA_ALLOWED = True#UPLOAD_MEDIA_ALLOWED = False#g' /home/mediacms.io/mediacms/cms/settings.py
+sudo sed -i 's#CAN_ADD_MEDIA = "all"#CAN_ADD_MEDIA = "advancedUser"#g' /home/mediacms.io/mediacms/cms/settings.py
+
 # Redis
 sudo sed -i 's#//127.0.0.1#//"+os.getenv("redis_endpoint")+"#g' /home/mediacms.io/mediacms/cms/settings.py
 
