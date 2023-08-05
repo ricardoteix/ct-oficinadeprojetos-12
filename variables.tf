@@ -32,6 +32,13 @@ variable "ec2-ami" {
   default     = "ami-0c4f7023847b90238" # Canonical, Ubuntu, 20.04 LTS
 }
 
+variable "ec2-usar-ip-publico" {
+  description = "Definine se a instância ficará em subnet pública ou não"
+  type        = bool
+  default     = true
+}
+
+
 variable "ec2-tipo-instancia" {
   description = "Tipo da instância do EC2"
   type        = string
@@ -83,6 +90,7 @@ variable "health_check" {
       "port"     = "80"
       "unhealthy_threshold" = "2"
       "healthy_threshold" = "3"
+      "matcher" = "200,302"
     }
 }
 

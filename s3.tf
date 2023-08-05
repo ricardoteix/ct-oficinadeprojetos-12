@@ -17,8 +17,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "projeto-static-config" {
     status = "Enabled"
 
     transition {
-      days          = 30
-      storage_class = "STANDARD_IA"
+      days          = 1
+      storage_class = "INTELLIGENT_TIERING"
     }
 
   }
@@ -35,17 +35,17 @@ resource "random_string" "random_etag" {
   numeric  = true
 }
 
-resource "aws_s3_object" "env_upload" {
-  bucket = var.nome-bucket
-  key    = ".env"
-  source = "${path.module}/usando_ami/.env"
-  etag   = "${random_string.random_etag.result}"
+# resource "aws_s3_object" "env_upload" {
+#   bucket = var.nome-bucket
+#   key    = ".env"
+#   source = "${path.module}/usando_ami/.env"
+#   etag   = "${random_string.random_etag.result}"
   
-  depends_on = [ 
-    local_file.dot_env,
-    aws_s3_bucket.projeto-static
-  ]
-}
+#   depends_on = [ 
+#     local_file.dot_env,
+#     aws_s3_bucket.projeto-static
+#   ]
+# }
 
 resource "aws_s3_object" "banner_upload" {
   bucket = var.nome-bucket

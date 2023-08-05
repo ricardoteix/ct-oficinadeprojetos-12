@@ -2,45 +2,45 @@
  # Criando variáveis no arquivo projeto_user_data.sh
  data "template_file" "projeto-user-data-script" {
   template = file(var.arquivo-user-data)
-  vars = {
+  # vars = {
     # efs_id = aws_efs_file_system.projeto-efs.id
-    region = "${var.regiao}",
-    sns_topic_arn = aws_sns_topic.projeto-events.arn,
-    rds_addr = aws_db_instance.projeto-rds.address,
-    full_domain = var.has-domain ? "${var.domain}.${var.hosted_zone_name}" : "localhost"
-    s3_user_id = aws_iam_access_key.s3_user_key.id,
-    s3_user_secret = aws_iam_access_key.s3_user_key.secret,
-    s3_bucket_name = var.nome-bucket,
-    cloudfront_domain_name = aws_cloudfront_distribution.media_cloudfront.domain_name,
-    sns_email = var.sns-email,
-    smtp_user = aws_iam_access_key.smtp_user.id,
-    smtp_password = aws_iam_access_key.smtp_user.ses_smtp_password_v4,
-    smtp_host = "email-smtp.${var.regiao}.amazonaws.com",
-    redis_endpoint = aws_elasticache_cluster.redis.cache_nodes.0.address
-  }
+    # region = "${var.regiao}",
+    # sns_topic_arn = aws_sns_topic.projeto-events.arn,
+    # rds_addr = aws_db_instance.projeto-rds.address,
+    # full_domain = var.has-domain ? "${var.domain}.${var.hosted_zone_name}" : "localhost"
+    # s3_user_id = aws_iam_access_key.s3_user_key.id,
+    # s3_user_secret = aws_iam_access_key.s3_user_key.secret,
+    # s3_bucket_name = var.nome-bucket,
+    # cloudfront_domain_name = aws_cloudfront_distribution.media_cloudfront.domain_name,
+    # sns_email = var.sns-email,
+    # smtp_user = aws_iam_access_key.smtp_user.id,
+    # smtp_password = aws_iam_access_key.smtp_user.ses_smtp_password_v4,
+    # smtp_host = "email-smtp.${var.regiao}.amazonaws.com",
+    # redis_endpoint = aws_elasticache_cluster.redis.cache_nodes.0.address
+  # }
 }
 
 locals {
   full_domain = var.has-domain ? "${var.domain}.${var.hosted_zone_name}" : "localhost"
 }
 
-resource "local_file" "dot_env" {
-    content  = <<-EOT
-region=${var.regiao}
-full_domain=${local.full_domain}
-s3_user_id=${aws_iam_access_key.s3_user_key.id}
-s3_user_secret=${aws_iam_access_key.s3_user_key.secret}
-s3_bucket_name=${var.nome-bucket}
-rds_addr=${aws_db_instance.projeto-rds.address}
-cloudfront_domain_name=${aws_cloudfront_distribution.media_cloudfront.domain_name}
-sns_email=${var.sns-email}
-smtp_user=${aws_iam_access_key.smtp_user.id}
-smtp_password=${aws_iam_access_key.smtp_user.ses_smtp_password_v4}
-smtp_host=email-smtp.${var.regiao}.amazonaws.com
-redis_endpoint=${aws_elasticache_cluster.redis.cache_nodes.0.address}
-    EOT
-    filename = "${path.module}/usando_ami/.env"
-}
+# resource "local_file" "dot_env" {
+#     content  = <<-EOT
+# region=${var.regiao}
+# full_domain=${local.full_domain}
+# s3_user_id=${aws_iam_access_key.s3_user_key.id}
+# s3_user_secret=${aws_iam_access_key.s3_user_key.secret}
+# s3_bucket_name=${var.nome-bucket}
+# rds_addr=${aws_db_instance.projeto-rds.address}
+# cloudfront_domain_name=${aws_cloudfront_distribution.media_cloudfront.domain_name}
+# sns_email=${var.sns-email}
+# smtp_user=${aws_iam_access_key.smtp_user.id}
+# smtp_password=${aws_iam_access_key.smtp_user.ses_smtp_password_v4}
+# smtp_host=email-smtp.${var.regiao}.amazonaws.com
+# redis_endpoint=${aws_elasticache_cluster.redis.cache_nodes.0.address}
+#     EOT
+#     filename = "${path.module}/usando_ami/.env"
+# }
 
 # Criando uma instância EC2
 # resource "aws_instance" "projeto" {
@@ -106,6 +106,7 @@ resource "aws_lb_target_group" "tg-projeto" {
       timeout             = var.health_check["timeout"]
       path                = var.health_check["path"]
       port                = var.health_check["port"]
+      matcher             = var.health_check["matcher"]
   }
   stickiness {
     type = "app_cookie"
@@ -145,3 +146,18 @@ resource "aws_lb_listener" "lb_listner_https" {
     target_group_arn = aws_lb_target_group.tg-projeto.arn
   }
 }
+
+# resource "aws_lb_listener_rule" "projeto-listener-rule" {
+#   listener_arn = aws_lb_listener.projeto-listener.arn
+
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.tg-mediacms-adm.arn
+#   }
+
+#   condition {
+#     path_pattern {
+#       values = ["/fu/upload/*"]
+#     }
+#   }
+# }

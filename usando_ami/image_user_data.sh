@@ -13,10 +13,18 @@ echo "# Senha do admin: adm2023cms #"
 echo "##############################"
 
 # Criar credendiais com permissao para leitura e escrita bo bucket
-s3_user_id=${s3_user_id}
-s3_user_secret=${s3_user_secret}
-s3_bucket_name=${s3_bucket_name}
-rds_addr=${rds_addr}
+parameter_name="mediacms"
+json_value=$(aws ssm get-parameter --name "$parameter_name" --query 'Parameter.Value' --output text)
+
+s3_user_id=$(echo "$json_value" | jq -r '.s3_user_id')
+s3_user_secret=$(echo "$json_value" | jq -r '.s3_user_secret')
+s3_bucket_name=$(echo "$json_value" | jq -r '.s3_bucket_name')
+rds_addr=$(echo "$json_value" | jq -r '.rds_addr')
+
+# s3_user_id=${s3_user_id}
+# s3_user_secret=${s3_user_secret}
+# s3_bucket_name=${s3_bucket_name}
+# rds_addr=${rds_addr}
 
 ##############################
 # Nao mexer daqui para baixo #
@@ -83,7 +91,7 @@ psql -c "DROP DATABASE IF EXISTS mediacms"
 psql -c "CREATE DATABASE mediacms"
 psql -c "GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms"
 
-sudo chmod 755 media_files/.env
+# sudo chmod 755 media_files/.env
 sudo su
 
 # Atualizando Banco de Dados
@@ -104,14 +112,6 @@ fi
 
 # Tema
 sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
-
-
-# Download do banner e imagem do usuario (logo) padrao
-# mkdir -p /home/mediacms.io/mediacms/media_files/hls
-# mkdir -p /home/mediacms.io/mediacms/media_files/userlogos
-# wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/banner.jpg
-# wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/user.jpg
-
 
 systemctl restart nginx mediacms celery_long celery_short
 

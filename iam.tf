@@ -77,12 +77,10 @@ resource "aws_iam_role_policy" "projeto-policy" {
             "Effect": "Allow",
             "Action": [
                 "sns:Publish",
-                "s3:ListBucket",
-                "elasticfilesystem:DescribeFileSystems"
+                "s3:ListBucket"
             ],
             "Resource": [
                 "arn:aws:s3:::${var.nome-bucket}",
-                "arn:aws:elasticfilesystem:*:930779231265:file-system/*",
                 "${aws_sns_topic.projeto-events.arn}"
             ]
         },
@@ -91,6 +89,12 @@ resource "aws_iam_role_policy" "projeto-policy" {
             "Effect": "Allow",
             "Action": "*",
             "Resource": "arn:aws:s3:::${var.nome-bucket}/*"
+        },
+        {
+            "Sid": "AllowGetParameterStoreMediaCMS",
+            "Effect": "Allow",
+            "Action": "ssm:GetParameter",
+            "Resource": "arn:aws:ssm:us-east-1:${data.aws_caller_identity.current.account_id}:parameter/mediacms"
         }
     ]
 }
