@@ -5,8 +5,8 @@ Para subir o Media CMS publicamos uma AMI com diversas pré-configurações.
 No [AMI Catalog](https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-east-1#AMICatalog:) se você procurar por "projeto12" você de encontrar a AMI 
 
 ```
-ct-projeto12-mediacms-v2
-ami-028a8210e4ccd79b6
+ct-projeto12-mediacms-v3
+ami-0f5458d90eb72ccdc
 ```
 
 Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.
@@ -35,8 +35,25 @@ Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.
     - Após a criação do *Node* um Endpoint ficará disponível com o formato similar a este: ``redis-projeto12-ami-nocluster-001.dpe5c4.0001.use1.cache.amazonaws.com``. Não especifique a porta, na variável redis_endpoint, apenas até o .com.
 - Criar Application Load Balancer e TargetGroup
 - Criar Domínio/Subdomínio no Route53 apontando para o Load Balancer
-- Criar na raiz do S3 o arquivo ``.env`` com todas as variáveis definidas com base no que foi criado. O modelo deste arquivo está na pasta ``usando_ami/subir_para_bucket`` deste repositório.
-- Criar o EC2 com base na AMI **ct-projeto12-mediacms (ami-0230a8d89aa340613)** e usar o modelo do arquivo ``image_user_data.sh`` com as devidas variáveis ataulizadas para o Advanced details : User data.
+- Criar um Parameter Store no SSM chamado **mediacms**, com todas as variáveis definidas com base no que foi criado, em um json como código abaixo. Você pode usar o site [jsonlint.com](jsonlint.com) para validar seu json antes de salvar no Parameter Store. 
+```json
+{
+  "cloudfront_domain_name":  "Endereço da distribuição CloudFront",
+  "full_domain":  "Domínio da aplicação. Se não tiver use o DNS do Load Balancer ou IP do EC2",
+  "rds_addr":  "Endereço do RDS",
+  "redis_endpoint":  "Endpoint do Redis",
+  "region":  "us-east-1",
+  "s3_bucket_name":  "Nome do bucket",
+  "s3_user_id":  "KEY ID",
+  "s3_user_secret":  "SECRET KEY",
+  "smtp_host":  "Host do SMTP",
+  "smtp_password":  "Senha do SMTL",
+  "smtp_user":  "Usuário do SMTL",
+  "sns_email":  "Email do admin",
+  "sns_topic_arn": "ARN do tópico SNS caso necessario"
+}
+```
+- Criar o EC2 com base na AMI **ct-projeto12-mediacms-v3 (ami-0f5458d90eb72ccdc)** e usar o modelo do arquivo ``image_user_data.sh`` com as devidas variáveis ataulizadas para o Advanced details : User data.
     - Precisa ser no mínimo t3a.small
     - Variáveis para atualizar no arquivo: 
         - ``s3_user_id``

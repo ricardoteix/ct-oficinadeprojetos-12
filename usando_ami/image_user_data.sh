@@ -63,7 +63,7 @@ cd /home/mediacms.io/mediacms/
 # sudo rm -rf /home/mediacms.io/mediacms/media_files
 # mkdir -p /home/mediacms.io/mediacms/media_files
 cd /home/mediacms.io/mediacms
-sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002
+sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002 -o nonempty
 # sudo mv ./userlogos/ ./media_files/userlogos/
 
 # Caminho do arquivo que indica que uma implantacao ja foi realizada
