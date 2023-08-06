@@ -85,7 +85,9 @@ echo "s3transfer==0.6.1" >> requirements.txt
 
 # Usar dotenv para inserir os variáveis no código
 # sed -i '/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client("ssm", region_name="$region")\n\nresponse = ssm_client.get_parameter(Name="mediacms", WithDecryption=False)\nparameter = json.loads(response["Parameter"]["Value"])' /home/mediacms.io/mediacms/cms/settings.py
-sed -i '/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client("ssm", region_name="'"$region"'")\n\nresponse = ssm_client.get_parameter(Name="mediacms", WithDecryption=False)\nparameter = json.loads(response["Parameter"]["Value"])' /home/mediacms.io/mediacms/cms/settings.py
+# sed -i '/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client("ssm", region_name="'"$region"'")\n\nresponse = ssm_client.get_parameter(Name="mediacms", WithDecryption=False)\nparameter = json.loads(response["Parameter"]["Value"])' /home/mediacms.io/mediacms/cms/settings.py
+sed -i "/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client(\"ssm\", region_name='$region')\n\nresponse = ssm_client.get_parameter(Name=\"mediacms\", WithDecryption=False)\nparameter = json.loads(response[\"Parameter\"][\"Value\"])" /home/mediacms.io/mediacms/cms/settings.py
+
 
 # Define o endereço das mídias. Usar com https
 # sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = "https://$cloudfront_domain_name/"#g' /home/mediacms.io/mediacms/cms/settings.py
