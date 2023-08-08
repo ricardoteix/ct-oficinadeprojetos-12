@@ -82,31 +82,6 @@ resource "aws_security_group" "sg_projeto_db" {
 
 }
 
-# Criando Security Group para EFS
-# resource "aws_security_group" "sg_projeto_efs" {
-#   name = "sg_${var.tag-base}_efs"
-#   description= "Allos inbound efs traffic from ec2"
-#   vpc_id = aws_vpc.vpc-projeto.id
-
-#   ingress {
-#     security_groups = [aws_security_group.sg_projeto_web.id]
-#     from_port = 2049
-#     to_port = 2049 
-#     protocol = "tcp"
-#   }     
-      
-#   egress {
-#     security_groups = [aws_security_group.sg_projeto_web.id]
-#     from_port = 0
-#     to_port = 0
-#     protocol = "-1"
-#   }
-
-#     tags = {
-#       Name = "sg-${var.tag-base}-efs"
-#     }
-#  }
-
 resource "aws_security_group" "sg_projeto_elb" {
   name        = "sg_${var.tag-base}_elb"
   description = "Allow web ELB"

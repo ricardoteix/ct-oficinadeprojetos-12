@@ -37,21 +37,9 @@ output "projeto-rds-host" {
   value = aws_db_instance.projeto-rds.address
 }
 
-# output "server" {
-#   value = "http://${aws_instance.projeto.public_dns}/info.php"
-# }
-
-# output "projeto-efs_id" {
-#   value = aws_efs_file_system.projeto-efs.id
-# }
-
 output "nome-bucket" {
   value = var.nome-bucket
 }
-
-# output "projeto-user-data-script" {
-#   value = data.template_file.projeto-user-data-script.rendered
-# }
 
 output "s3-user-id" {
   value = aws_iam_access_key.s3_user_key.id

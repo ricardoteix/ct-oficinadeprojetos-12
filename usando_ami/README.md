@@ -53,7 +53,7 @@ Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.
   "sns_topic_arn": "ARN do tópico SNS caso necessario"
 }
 ```
-- Criar o EC2 com base na AMI **ct-projeto12-mediacms-v3 (ami-0f5458d90eb72ccdc)** e usar o modelo do arquivo ``image_user_data.sh`` com as devidas variáveis ataulizadas para o Advanced details : User data.
+- Criar o EC2 com base na AMI **ct-projeto12-mediacms-v3 (ami-085937d2247364b89)** e usar o modelo do arquivo ``image_user_data.sh`` com as devidas variáveis ataulizadas para o Advanced details : User data.
     - Precisa ser no mínimo t3a.small
     - Variáveis para atualizar no arquivo: 
         - ``s3_user_id``

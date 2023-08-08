@@ -94,6 +94,7 @@ sed -i "/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_clien
 # sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = f"https://{parameter[\"cloudfront_domain_name\"]}/"#g' settings.py
 sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = f\"\"\"https://{parameter[\"cloudfront_domain_name\"]}/\"\"\"#g' /home/mediacms.io/mediacms/cms/settings.py
 
+
 # Define os dados do EMAIL e SES
 sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = parameter["smtp_user"]#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#"info@mediacms.io"#parameter["sns_email"]#g' /home/mediacms.io/mediacms/cms/settings.py

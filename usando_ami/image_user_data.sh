@@ -2,9 +2,6 @@
 
 ##############################################
 # Defina os valores para as variaveis abaixo #
-#                                            # 
-# Por exemplo, troque o  ${s3_bucket_name}   # 
-# pelo nome do bucket.                       # 
 ##############################################
 
 # OBS: A senha do usuario admin e adm2023cms
@@ -13,18 +10,39 @@ echo "# Senha do admin: adm2023cms #"
 echo "##############################"
 
 # Criar credendiais com permissao para leitura e escrita bo bucket
+# parameter_name="mediacms"
+# json_value=$(aws ssm get-parameter --name "$parameter_name" --query 'Parameter.Value' --output text)
+
 parameter_name="mediacms"
-json_value=$(aws ssm get-parameter --name "$parameter_name" --query 'Parameter.Value' --output text)
+max_attempts=15  # Número máximo de tentativas
+
+for ((attempt=1; attempt<=$max_attempts; attempt++)); do
+    json_value=$(aws ssm get-parameter --name "$parameter_name" --query 'Parameter.Value' --output text)
+    
+    if [ -n "$json_value" ]; then
+        echo "##########################################################"
+        echo ">>> Valor obtido na tentativa $attempt: $json_value"
+        echo "##########################################################"
+        break  # Sai do loop se um valor válido for obtido
+    else
+        echo "##########################################################"
+        echo "# Tentativa $attempt: Valor vazio, tentando novamente... # "
+        echo "##########################################################"
+        sleep 5  # Pausa entre tentativas, se desejar
+    fi
+done
+
+if [ -z "$json_value" ]; then
+    echo "#########################################################################"
+    echo "# Não foi possível obter um valor válido após $max_attempts tentativas. #"
+    echo "#########################################################################"
+fi
 
 s3_user_id=$(echo "$json_value" | jq -r '.s3_user_id')
 s3_user_secret=$(echo "$json_value" | jq -r '.s3_user_secret')
 s3_bucket_name=$(echo "$json_value" | jq -r '.s3_bucket_name')
 rds_addr=$(echo "$json_value" | jq -r '.rds_addr')
-
-# s3_user_id=${s3_user_id}
-# s3_user_secret=${s3_user_secret}
-# s3_bucket_name=${s3_bucket_name}
-# rds_addr=${rds_addr}
+FRONTEND_HOST=$(echo "$json_value" | jq -r '.full_domain')
 
 ##############################
 # Nao mexer daqui para baixo #
@@ -36,16 +54,16 @@ sudo su -c "sed -i '/^s3_user_secret=/d' /etc/environment"
 sudo su -c "sed -i '/^s3_bucket_name=/d' /etc/environment"
 
 # Defição das variáveis de ambiente
-sudo su -c "echo s3_user_id=${s3_user_id} >> /etc/environment"
-sudo su -c "echo s3_user_secret=${s3_user_secret} >> /etc/environment"
-sudo su -c "echo s3_bucket_name=${s3_bucket_name} >> /etc/environment"
+sudo su -c "echo s3_user_id=$s3_user_id >> /etc/environment"
+sudo su -c "echo s3_user_secret=$s3_user_secret >> /etc/environment"
+sudo su -c "echo s3_bucket_name=$s3_bucket_name >> /etc/environment"
 sudo su -c "source /etc/environment"
 source /etc/environment
 
 # Define o arquivo padrao das credenciais do s3fs
 # Usando para montar ao inicializar a maquina
-sudo su -c "echo ${s3_user_id}:${s3_user_secret} > /etc/passwd-s3fs"
-sudo su - "chmod 400 /etc/passwd-s3fs"
+sudo su -c "echo $s3_user_id:$s3_user_secret > /etc/passwd-s3fs"
+sudo su -c "chmod 400 /etc/passwd-s3fs"
 
 # Buscar o id do usuario e id do grupo
 uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
@@ -53,17 +71,15 @@ gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
 
 # Registra no fstab o código para montar o s3fs ao inicializar
 sudo su -c "sed -i '/^ct-projeto12/d' /etc/fstab"
-sudo su -c "echo ${s3_bucket_name} /home/mediacms.io/mediacms/media_files fuse.s3fs _netdev,uid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002  0 0 >> /etc/fstab"
+sudo su -c "echo $s3_bucket_name /home/mediacms.io/mediacms/media_files fuse.s3fs _netdev,uid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002  0 0 >> /etc/fstab"
 # sudo su -c "mount -a"
+
+systemctl stop nginx mediacms celery_long celery_short
 
 # Desmonta
 sudo su -c "umount media_files"
 cd /home/mediacms.io/mediacms/
-# sudo mv media_files/userlogos/ ./userlogos/
-# sudo rm -rf /home/mediacms.io/mediacms/media_files
-# mkdir -p /home/mediacms.io/mediacms/media_files
-cd /home/mediacms.io/mediacms
-sudo s3fs ${s3_bucket_name} media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002 -o nonempty
+sudo s3fs $s3_bucket_name media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002 -o nonempty
 # sudo mv ./userlogos/ ./media_files/userlogos/
 
 # Caminho do arquivo que indica que uma implantacao ja foi realizada
@@ -113,7 +129,7 @@ fi
 # Tema
 sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
 
-systemctl restart nginx mediacms celery_long celery_short
+systemctl start nginx mediacms celery_long celery_short
 
 echo "######################"
 echo "# Fim da Implantacao #"
