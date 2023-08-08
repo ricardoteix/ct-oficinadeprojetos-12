@@ -40,10 +40,10 @@ mkdir -p /home/mediacms.io/mediacms/media_files
 cd /home/mediacms.io/mediacms
 
 # Cria o arquivo com as credenciais do S3
+# Define o arquivo padrão das credenciais do s3fs.
+# Usando para montar ao inicializar a máquina
 sudo su -c "echo $s3_user_id:$s3_user_secret > /etc/passwd-s3fs"
 sudo su -c "chmod 400 /etc/passwd-s3fs"
-
-# chmod 600 .passwd-s3fs
 
 # Se não for usar s3fs pode montar o Storage File Gateway com os passos:
 # - Definir o Squash level: No root squash
@@ -55,11 +55,6 @@ sudo su -c "chmod 400 /etc/passwd-s3fs"
 uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
 gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
 sudo s3fs $s3_bucket_name media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002
-
-# Define o arquivo padrão das credenciais do s3fs.
-# Usando para montar ao inicializar a máquina
-# sudo cp .passwd-s3fs /etc/passwd-s3fs
-# sudo chmod 400 /etc/passwd-s3fs
 
 # Registra no fstab o código para montar o s3fs ao inicializar
 sudo su -c "echo $s3_bucket_name /home/mediacms.io/mediacms/media_files fuse.s3fs _netdev,uid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002  0 0 >> /etc/fstab"
@@ -84,16 +79,10 @@ echo "botocore==1.31.9" >> requirements.txt
 echo "s3transfer==0.6.1" >> requirements.txt
 
 # Usar dotenv para inserir os variáveis no código
-# sed -i '/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client("ssm", region_name="$region")\n\nresponse = ssm_client.get_parameter(Name="mediacms", WithDecryption=False)\nparameter = json.loads(response["Parameter"]["Value"])' /home/mediacms.io/mediacms/cms/settings.py
-# sed -i '/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client("ssm", region_name="'"$region"'")\n\nresponse = ssm_client.get_parameter(Name="mediacms", WithDecryption=False)\nparameter = json.loads(response["Parameter"]["Value"])' /home/mediacms.io/mediacms/cms/settings.py
 sed -i "/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client(\"ssm\", region_name='$region')\n\nresponse = ssm_client.get_parameter(Name=\"mediacms\", WithDecryption=False)\nparameter = json.loads(response[\"Parameter\"][\"Value\"])" /home/mediacms.io/mediacms/cms/settings.py
 
-
 # Define o endereço das mídias. Usar com https
-# sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = "https://$cloudfront_domain_name/"#g' /home/mediacms.io/mediacms/cms/settings.py
-# sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = f"https://{parameter[\"cloudfront_domain_name\"]}/"#g' settings.py
 sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = f\"\"\"https://{parameter[\"cloudfront_domain_name\"]}/\"\"\"#g' /home/mediacms.io/mediacms/cms/settings.py
-
 
 # Define os dados do EMAIL e SES
 sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = parameter["smtp_user"]#g' /home/mediacms.io/mediacms/cms/settings.py
@@ -116,7 +105,6 @@ sudo sed -i 's#Europe/London#America/Recife#g' /home/mediacms.io/mediacms/cms/se
 sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Define as credenciais do banco
-# sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": "$rds_addr"#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": parameter["rds_addr"]#g' /home/mediacms.io/mediacms/cms/settings.py
 
 # Instalação do MediacMS
