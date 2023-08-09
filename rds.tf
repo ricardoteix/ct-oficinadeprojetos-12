@@ -26,6 +26,7 @@ resource "aws_db_instance" "projeto-rds" {
   skip_final_snapshot  = true # Para uso em produção, considerar mudar o valor para false 
   final_snapshot_identifier = "${var.rds-identificador}-bkp"
   publicly_accessible = false
+  apply_immediately   = true
   vpc_security_group_ids = [aws_security_group.sg_projeto_db.id]
   db_subnet_group_name    = aws_db_subnet_group.projeto-sn-db-group.id
   tags = {
