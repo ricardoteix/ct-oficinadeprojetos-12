@@ -6,7 +6,7 @@ No [AMI Catalog](https://us-east-1.console.aws.amazon.com/ec2/v2/home?region=us-
 
 ```
 ct-projeto12-mediacms-v3
-ami-0f5458d90eb72ccdc
+ami-085937d2247364b89
 ```
 
 Use essa AMI para subir a instância EC2 no devido passo da lista a seguir.

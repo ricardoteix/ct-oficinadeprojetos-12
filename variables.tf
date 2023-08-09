@@ -38,6 +38,11 @@ variable "ec2-usar-ip-publico" {
   default     = true
 }
 
+variable "use-upload-instance" {
+  description = "Definine se a instância exclusiva para upload será criada"
+  type        = number
+  default     = 1
+}
 
 variable "ec2-tipo-instancia" {
   description = "Tipo da instância do EC2"

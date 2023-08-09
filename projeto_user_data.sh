@@ -128,7 +128,8 @@ cp -v tmp/{ffmpeg,ffprobe,qt-faststart} /usr/local/bin
 rm -rf tmp ffmpeg-release-amd64-static.tar.xz
 echo "ffmpeg installed to /usr/local/bin"
 
-PORTAL_NAME="Oficina de Projetos 12"
+instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`
+PORTAL_NAME="$instance_id - Oficina de Projetos 12"
 FRONTEND_HOST="$full_domain"
 
 echo 'Creating database to be used in MediaCMS'
@@ -165,35 +166,35 @@ mkdir pids
 if [ -f "$file" ]
 then
 
-echo "##############################"
-echo "# Banco de dados incializado #"
-echo "# Acesso: admin | adm2023cms #"
-echo "##############################"
+    echo "##############################"
+    echo "# Banco de dados incializado #"
+    echo "# Acesso: admin | adm2023cms #"
+    echo "##############################"
 
 else
 
-# Limpando o Banco
-export PGHOST=$rds_addr
-export PGPORT=5432
-export PGDATABASE=postgres
-export PGUSER=mediacms
-export PGPASSWORD=mediacms
+    # Limpando o Banco
+    export PGHOST=$rds_addr
+    export PGPORT=5432
+    export PGDATABASE=postgres
+    export PGUSER=mediacms
+    export PGPASSWORD=mediacms
 
-psql -c "DROP DATABASE IF EXISTS mediacms"
-psql -c "CREATE DATABASE mediacms"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms"
+    psql -c "DROP DATABASE IF EXISTS mediacms"
+    psql -c "CREATE DATABASE mediacms"
+    psql -c "GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms"
 
-python manage.py migrate
-python manage.py loaddata fixtures/encoding_profiles.json
-python manage.py loaddata fixtures/categories.json
-python manage.py collectstatic --noinput
+    python manage.py migrate
+    python manage.py loaddata fixtures/encoding_profiles.json
+    python manage.py loaddata fixtures/categories.json
+    python manage.py collectstatic --noinput
 
-# ADMIN_PASS=`python -c "import secrets;chars = 'abcdefghijklmnopqrstuvwxyz0123456789';print(''.join(secrets.choice(chars) for i in range(10)))"`
-ADMIN_PASS=adm2023cms
-# $sns_email
-echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
+    # ADMIN_PASS=`python -c "import secrets;chars = 'abcdefghijklmnopqrstuvwxyz0123456789';print(''.join(secrets.choice(chars) for i in range(10)))"`
+    ADMIN_PASS=adm2023cms
+    # $sns_email
+    echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
 
-echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
+    echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
 
 fi
 
@@ -243,6 +244,13 @@ chown -R www-data. /home/mediacms.io/
 echo 'MediaCMS installation completed, open browser on http://'"$FRONTEND_HOST"' and login with user admin and password '"$ADMIN_PASS"''
 
 echo 'O login do administrador é admin e a senha é '"$ADMIN_PASS"'' > /home/mediacms.io/mediacms/admin.txt
+
+# Desabilita celery_long para evitar processamento de video
+upload=`curl http://169.254.169.254/latest/meta-data/tags/instance | grep -c "ProcessUpload"`
+if [[ $upload -eq 0 ]];
+then
+    systemctl stop celery_long
+fi
 
 
 echo '############### Publicando SNS ################'

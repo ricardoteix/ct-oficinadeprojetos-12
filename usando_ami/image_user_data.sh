@@ -88,48 +88,60 @@ file=/home/mediacms.io/mediacms/media_files/started.info
 if [ -f "$file" ]
 then
 
-echo "##############################"
-echo "# Banco de dados incializado #"
-echo "##############################"
+    echo "##############################"
+    echo "# Banco de dados incializado #"
+    echo "##############################"
 
 else
 
-sudo su -c "echo started > /home/mediacms.io/mediacms/media_files/started.info"
+    sudo su -c "echo started > /home/mediacms.io/mediacms/media_files/started.info"
 
-# Limpando o Banco
-export PGHOST=$rds_addr
-export PGPORT=5432
-export PGDATABASE=postgres
-export PGUSER=mediacms
-export PGPASSWORD=mediacms
+    # Limpando o Banco
+    export PGHOST=$rds_addr
+    export PGPORT=5432
+    export PGDATABASE=postgres
+    export PGUSER=mediacms
+    export PGPASSWORD=mediacms
 
-psql -c "DROP DATABASE IF EXISTS mediacms"
-psql -c "CREATE DATABASE mediacms"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms"
+    psql -c "DROP DATABASE IF EXISTS mediacms"
+    psql -c "CREATE DATABASE mediacms"
+    psql -c "GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms"
 
-# sudo chmod 755 media_files/.env
-sudo su
+    # sudo chmod 755 media_files/.env
+    sudo su
 
-# Atualizando Banco de Dados
-cd /home/mediacms.io
-source /home/mediacms.io/bin/activate
-cd mediacms
+    # Atualizando Banco de Dados
+    cd /home/mediacms.io
+    source /home/mediacms.io/bin/activate
+    cd mediacms
 
-python manage.py migrate
-python manage.py loaddata fixtures/encoding_profiles.json
-python manage.py loaddata fixtures/categories.json
-python manage.py collectstatic --noinput
+    python manage.py migrate
+    python manage.py loaddata fixtures/encoding_profiles.json
+    python manage.py loaddata fixtures/categories.json
+    python manage.py collectstatic --noinput
 
-ADMIN_PASS=adm2023cms
-echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
-echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
+    ADMIN_PASS=adm2023cms
+    echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
+    echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
 
 fi
 
 # Tema
 sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
 
+# Titulo com id da instancis
+instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`
+PORTAL_NAME="$instance_id - Oficina de Projetos 12"
+echo 'PORTAL_NAME='\'"$PORTAL_NAME"\' >> /home/mediacms.io/mediacms/cms/local_settings.py
+
 systemctl start nginx mediacms celery_long celery_short
+
+# Desabilita celery_long para evitar processamento de video
+upload=`curl http://169.254.169.254/latest/meta-data/tags/instance | grep -c "ProcessUpload"`
+if [[ $upload -eq 0 ]];
+then
+    systemctl stop celery_long
+fi
 
 echo "######################"
 echo "# Fim da Implantacao #"

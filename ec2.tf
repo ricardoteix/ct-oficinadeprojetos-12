@@ -1,10 +1,11 @@
  # Criando variáveis no arquivo projeto_user_data.sh
- # As vars apenas geram uma dependeicia para que o Terraform
+ # As vars apenas geram uma dependencia para que o Terraform
  # só crie a primeira instância após todos os serviços
  # serem criados.
  data "template_file" "projeto-user-data-script" {
   template = file(var.arquivo-user-data)
   vars = {
+    use_upload_instance = var.use-upload-instance,
     region = "${var.regiao}",
     sns_topic_arn = aws_sns_topic.projeto-events.arn,
     rds_addr = aws_db_instance.projeto-rds.address,
@@ -89,4 +90,94 @@ resource "aws_lb_listener" "lb_listner_https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.tg-projeto.arn
   }
+}
+
+# ####### MEDIA CMS UPLOAD #########
+
+# Criando uma instância EC2
+resource "aws_instance" "upload" {
+  count = var.use-upload-instance == 1 ? 1 : 0
+  ami = var.ec2-ami
+  instance_type = "${var.ec2-tipo-instancia}"
+  availability_zone = "${var.regiao}a"
+  key_name = "${var.ec2-chave-instancia}"
+
+  iam_instance_profile = aws_iam_instance_profile.projeto-profile.name
+
+  network_interface {
+    device_index = 0 # ordem da interface 
+    network_interface_id = aws_network_interface.nic-projeto-instance.id
+  }
+
+  # EBS root
+  root_block_device {
+    volume_size = var.ec2-tamanho-ebs
+    volume_type = "gp2"
+  }
+
+  # Usando renderização do arquivo pelo template_file
+  user_data = data.template_file.projeto-user-data-script.rendered  
+
+  metadata_options {
+    instance_metadata_tags = "enabled"
+  }
+
+  tags = {
+      Name = "${var.tag-base}-upload"
+      ProcessUpload = "only" # O valor não importa. Se a tag existir a instância será responsável pelo upload
+  }
+}
+
+resource "aws_lb_target_group" "tg-upload" {
+  # for_each  = [aws_lb.projeto-elb.name]
+  count = var.use-upload-instance == 1 ? 1 : 0
+  name     = "tg-projeto-upload"
+  target_type   = "instance"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.vpc-projeto.id
+  health_check {
+      healthy_threshold   = var.health_check["healthy_threshold"]
+      interval            = var.health_check["interval"]
+      unhealthy_threshold = var.health_check["unhealthy_threshold"]
+      timeout             = var.health_check["timeout"]
+      path                = var.health_check["path"]
+      port                = var.health_check["port"]
+      matcher             = var.health_check["matcher"]
+  }
+  stickiness {
+    type = "app_cookie"
+    cookie_name = "csrftoken"
+  }
+}
+
+resource "aws_lb_listener_rule" "path_rule_upload" {
+  count = var.use-upload-instance == 1 ? 1 : 0
+  listener_arn = aws_lb_listener.lb_listner_https[0].arn
+  priority     = 10
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.tg-upload[0].arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/fu/upload/*", "/fu/upload", "/fu/upload/", "/upload"]
+    }
+  }
+
+  # condition {
+  #   http_request_method {
+  #     values = ["POST"]
+  #   }
+  # }
+}
+
+# Attach the target group for "test" ALB
+resource "aws_lb_target_group_attachment" "tg_attachment_projeto-elb" {
+  count = var.use-upload-instance == 1 ? 1 : 0
+  target_group_arn = aws_lb_target_group.tg-upload[0].arn
+  target_id        = aws_instance.upload[0].id
+  port             = 80
 }
