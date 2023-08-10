@@ -69,4 +69,8 @@ arquivo-user-data = "usando_ami/image_user_data.sh"
 # ec2-ami = "ami-0c4f7023847b90238" # ubuntu 20.04
 ec2-ami = "ami-085937d2247364b89" # ami-v3
 
+# Valores possíveis: 0 ou 1
+# Se estiver definido como 1 vai criar a EC2, Lambda e
+# relacionar com o S3 para disparar o trigger e ligar 
+# a instância quando um novo vídeo chegar.
 use-upload-instance = 1

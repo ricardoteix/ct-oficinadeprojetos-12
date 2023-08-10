@@ -6,6 +6,9 @@
   template = file(var.arquivo-user-data)
   vars = {
     use_upload_instance = var.use-upload-instance,
+    upload_cpu_check_script = base64encode(data.template_file.upload-cpu-check-script.rendered)
+    upload_cpu_check_service = base64encode(data.template_file.upload-cpu-check-service.rendered)
+
     region = "${var.regiao}",
     sns_topic_arn = aws_sns_topic.projeto-events.arn,
     rds_addr = aws_db_instance.projeto-rds.address,
@@ -94,6 +97,13 @@ resource "aws_lb_listener" "lb_listner_https" {
 
 # ####### MEDIA CMS UPLOAD #########
 
+data "template_file" "upload-cpu-check-script" {
+  template = file("scripts/cpu_check.sh")
+}
+
+data "template_file" "upload-cpu-check-service" {
+  template = file("scripts/cpu_check.service")
+}
 # Criando uma instância EC2
 resource "aws_instance" "upload" {
   count = var.use-upload-instance == 1 ? 1 : 0
@@ -102,6 +112,7 @@ resource "aws_instance" "upload" {
   availability_zone = "${var.regiao}a"
   key_name = "${var.ec2-chave-instancia}"
 
+  instance_initiated_shutdown_behavior = "stop"
   iam_instance_profile = aws_iam_instance_profile.projeto-profile.name
 
   network_interface {
@@ -128,56 +139,50 @@ resource "aws_instance" "upload" {
   }
 }
 
-resource "aws_lb_target_group" "tg-upload" {
-  # for_each  = [aws_lb.projeto-elb.name]
-  count = var.use-upload-instance == 1 ? 1 : 0
-  name     = "tg-projeto-upload"
-  target_type   = "instance"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.vpc-projeto.id
-  health_check {
-      healthy_threshold   = var.health_check["healthy_threshold"]
-      interval            = var.health_check["interval"]
-      unhealthy_threshold = var.health_check["unhealthy_threshold"]
-      timeout             = var.health_check["timeout"]
-      path                = var.health_check["path"]
-      port                = var.health_check["port"]
-      matcher             = var.health_check["matcher"]
-  }
-  stickiness {
-    type = "app_cookie"
-    cookie_name = "csrftoken"
-  }
-}
+# resource "aws_lb_target_group" "tg-upload" {
+#   # for_each  = [aws_lb.projeto-elb.name]
+#   count = var.use-upload-instance == 1 ? 1 : 0
+#   name     = "tg-projeto-upload"
+#   target_type   = "instance"
+#   port     = 80
+#   protocol = "HTTP"
+#   vpc_id   = aws_vpc.vpc-projeto.id
+#   health_check {
+#       healthy_threshold   = var.health_check["healthy_threshold"]
+#       interval            = var.health_check["interval"]
+#       unhealthy_threshold = var.health_check["unhealthy_threshold"]
+#       timeout             = var.health_check["timeout"]
+#       path                = var.health_check["path"]
+#       port                = var.health_check["port"]
+#       matcher             = var.health_check["matcher"]
+#   }
+#   stickiness {
+#     type = "app_cookie"
+#     cookie_name = "csrftoken"
+#   }
+# }
 
-resource "aws_lb_listener_rule" "path_rule_upload" {
-  count = var.use-upload-instance == 1 ? 1 : 0
-  listener_arn = aws_lb_listener.lb_listner_https[0].arn
-  priority     = 10
+# resource "aws_lb_listener_rule" "path_rule_upload" {
+#   count = var.use-upload-instance == 1 ? 1 : 0
+#   listener_arn = aws_lb_listener.lb_listner_https[0].arn
+#   priority     = 10
 
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.tg-upload[0].arn
-  }
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.tg-upload[0].arn
+#   }
 
-  condition {
-    path_pattern {
-      values = ["/fu/upload/*", "/fu/upload", "/fu/upload/", "/upload"]
-    }
-  }
+#   condition {
+#     path_pattern {
+#       values = ["/fu/upload/*", "/fu/upload", "/fu/upload/", "/upload"]
+#     }
+#   }
+# }
 
-  # condition {
-  #   http_request_method {
-  #     values = ["POST"]
-  #   }
-  # }
-}
-
-# Attach the target group for "test" ALB
-resource "aws_lb_target_group_attachment" "tg_attachment_projeto-elb" {
-  count = var.use-upload-instance == 1 ? 1 : 0
-  target_group_arn = aws_lb_target_group.tg-upload[0].arn
-  target_id        = aws_instance.upload[0].id
-  port             = 80
-}
+# # Attach the target group for "test" ALB
+# resource "aws_lb_target_group_attachment" "tg_attachment_projeto-elb" {
+#   count = var.use-upload-instance == 1 ? 1 : 0
+#   target_group_arn = aws_lb_target_group.tg-upload[0].arn
+#   target_id        = aws_instance.upload[0].id
+#   port             = 80
+# }

@@ -1,0 +1,9 @@
+[Unit]
+Description=Verifica a média da CPU e desliga a máquina se estiver abaixo de 10%
+After=network.target
+
+[Service]
+ExecStart=/home/mediacms.io/mediacms/cpu_check.sh
+
+[Install]
+WantedBy=default.target

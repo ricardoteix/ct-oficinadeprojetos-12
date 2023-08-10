@@ -82,3 +82,7 @@ output "ec2_conn_arn" {
 output "ec2-instance-conn" {
   value = "aws ec2-instance-connect ssh --instance-id EC2_ID --profile ${var.profile} --os-user ubuntu"
 }
+
+output "upload-script" {
+  value = data.template_file.upload-cpu-check-script.rendered
+}
