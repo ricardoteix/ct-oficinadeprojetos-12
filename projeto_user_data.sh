@@ -250,8 +250,33 @@ upload=`curl http://169.254.169.254/latest/meta-data/tags/instance | grep -c "Pr
 if [[ $upload -eq 0 ]];
 then
     systemctl stop celery_long
-fi
+else
 
+    sudo su -c echo "##################################################################' >> /var/log/syslog"
+    sudo su -c echo "#### Criando serviço para desligar a instância quando inativa ####' >> /var/log/syslog"
+    sudo su -c echo "##################################################################' >> /var/log/syslog"
+
+    cd /home/mediacms.io/mediacms/
+
+    sudo su -c "echo ${upload_cpu_check_script} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.sh"
+    sudo chmod +x /home/mediacms.io/mediacms/cpu_check.sh
+
+    # sudo echo "${upload_cpu_check_script}" > /home/mediacms.io/mediacms/cpu_check.sh
+    # sudo chmod +x /home/mediacms.io/cpu_check.sh
+
+    sudo su -c "echo ${upload_cpu_check_service} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.service"
+    # sudo echo "${upload_cpu_check_service}" > /home/mediacms.io/mediacms/cpu_check.service
+
+    sudo su -c "mv /home/mediacms.io/mediacms/cpu_check.service /etc/systemd/system/"
+    
+    systemctl daemon-reload
+    systemctl start cpu_check.service
+    systemctl enable cpu_check.service
+
+    echo "######################"
+    echo "# Fim da Implantacao #"
+    echo "######################"
+fi
 
 echo '############### Publicando SNS ################'
 
