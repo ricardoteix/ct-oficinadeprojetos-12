@@ -41,14 +41,14 @@ output "nome-bucket" {
   value = var.nome-bucket
 }
 
-output "s3-user-id" {
-  value = aws_iam_access_key.s3_user_key.id
-}
+# output "s3-user-id" {
+#   value = aws_iam_access_key.s3_user_key.id
+# }
 
-output "s3-user-secret" {
-  value = aws_iam_access_key.s3_user_key.secret
-  sensitive = true
-}
+# output "s3-user-secret" {
+#   value = aws_iam_access_key.s3_user_key.secret
+#   sensitive = true
+# }
 
 output "domain" {
   value = var.domain
@@ -81,8 +81,4 @@ output "ec2_conn_arn" {
 
 output "ec2-instance-conn" {
   value = "aws ec2-instance-connect ssh --instance-id EC2_ID --profile ${var.profile} --os-user ubuntu"
-}
-
-output "upload-script" {
-  value = data.template_file.upload-cpu-check-script.rendered
 }
