@@ -7,8 +7,6 @@ resource "aws_ssm_parameter" "mediacms_params" {
         sns_topic_arn = aws_sns_topic.projeto-events.arn,
         rds_addr = aws_db_instance.projeto-rds.address,
         full_domain = var.has-domain ? "${var.domain}.${var.hosted_zone_name}" : "localhost"
-        s3_user_id = aws_iam_access_key.s3_user_key.id,
-        s3_user_secret = aws_iam_access_key.s3_user_key.secret,
         s3_bucket_name = var.nome-bucket,
         cloudfront_domain_name = aws_cloudfront_distribution.media_cloudfront.domain_name,
         sns_email = var.sns-email,
