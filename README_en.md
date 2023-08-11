@@ -119,7 +119,7 @@ terraform destroy --auto-approve
 
 
 
-## Considerações sobre a criação da infraestrutura
+## Considerations Regarding Infrastructure Creation
 
 1. After executing ``terraform apply``, the terminal will show how many resources were added, modified, or destroyed in your infrastructure.
 
