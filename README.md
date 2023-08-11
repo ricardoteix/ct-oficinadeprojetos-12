@@ -134,7 +134,6 @@ terraform destroy --auto-approve
 
 1. Ao destruir a infra, além dos dados na EC2, RDS e Elasticache, todos os arquivos do bucket serão perdidos.
 
----
 
 # Considerações finais
 
@@ -142,6 +141,12 @@ Este é um projeto para experimentações e estudo do Terraform.
 Mesmo proporcionando a criação dos recursos mínimos para execução do projeto na AWS, é desaconselhado o uso deste projeto para implantação de cargas de trabalho em ambiente produtivo.
 
 Apesar de utilizar técnicas para suportar crescimento no número de acessos, não foram realizados testes em ambiente com usuários reais, apenas com simulação de teste de carga mínimo com até 200 usuários virtuais usando a ferramenta [Locust](https://locust.io/). Ver arquivos na pasta [locust-load-test](./locust-load-test/).
+
+# Problemas conhecidos
+
+1. A aplicação faz multipart upload para arquivos considerados grandes, maiores que 4 MB aparentemente. Como a Lambda executa com um o trigger ``CompleteMultipartUpload`` do S3, esses arquivos menores não distaram a Lambda. É preciso fazer testes com o trigger de PUT/POST e verificar se poderão gerar problemas por criar arquivos no mesmo bucket.
+
+1. Atualmente o trigger da Lambda dispara quando os arquivos .mp4, .m4v, .mov e .avi chegam em qualquer local do bucket. Idealmente deveria ocorrer quando o arquivo chegar em uma pasta específica, ainda não identificada.
 
 # Referências
 

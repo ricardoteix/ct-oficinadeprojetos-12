@@ -115,10 +115,6 @@ or, to automatically confirm.
 terraform destroy --auto-approve
 ```
 
-## O arquivo terraform.tfvars
-
-
-
 ## Considerations Regarding Infrastructure Creation
 
 1. After executing ``terraform apply``, the terminal will show how many resources were added, modified, or destroyed in your infrastructure.
@@ -135,13 +131,18 @@ terraform destroy --auto-approve
 
 1. When destroying the infrastructure, in addition to the data on EC2, RDS, and Elasticache, all files in the bucket will be lost.
 
----
 
 # Final Considerations
 
 This project is designed for experimentation and studying Terraform. Although it provides the creation of the minimum resources to run the project on AWS, it is not recommended to use this project for deploying workloads in a production environment.
 
 Despite employing techniques to support scalability in terms of user access, no real user testing has been conducted. Only minimal load testing simulations were performed with up to 200 virtual users using the [Locust](https://locust.io/) tool. See files in the[locust-load-test](./locust-load-test/) folder.
+
+# Known Issues
+
+1. The application performs multipart uploads for files considered large, larger than 4 MB apparently. Since the Lambda is triggered by the S3 ``CompleteMultipartUpload`` event, these smaller files won't trigger the Lambda. Tests need to be conducted with the PUT/POST trigger to determine whether they might cause issues by creating files in the same bucket.
+
+2. Currently, the Lambda trigger fires when files with extensions .mp4, .m4v, .mov, and .avi arrive in any location within the bucket. Ideally, it should trigger when the file arrives in a specific folder, which hasn't been identified yet.
 
 # References
 
