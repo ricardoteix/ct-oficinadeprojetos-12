@@ -9,13 +9,9 @@ sudo apt-get install jq unzip -y
 
 sudo apt  install jq -y
 
-echo '##### INSTALANDO O AWS CLI #####'
-
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install
-
-echo '##### OBTENDO VALORES DO PARAMETER STORE #####'
 
 parameter_name="mediacms"
 json_value=$(aws ssm get-parameter --name "$parameter_name" --query 'Parameter.Value' --output text)
@@ -35,31 +31,15 @@ smtp_password=$(echo "$json_value" | jq -r '.smtp_password')
 smtp_host=$(echo "$json_value" | jq -r '.smtp_host')
 redis_endpoint=$(echo "$json_value" | jq -r '.redis_endpoint')
 
-# Configura o s3fs
 mkdir -p /home/mediacms.io/mediacms/media_files
 cd /home/mediacms.io/mediacms
 
-# Cria o arquivo com as credenciais do S3
-# Define o arquivo padrão das credenciais do s3fs.
-# Usando para montar ao inicializar a máquina
-sudo su -c "echo $s3_user_id:$s3_user_secret > /etc/passwd-s3fs"
-sudo su -c "chmod 400 /etc/passwd-s3fs"
-
-# Se não for usar s3fs pode montar o Storage File Gateway com os passos:
-# - Definir o Squash level: No root squash
-# - mount -t nfs -o nolock,hard IP_DO_GATEWAY:/NOME_BUCKET media_files
-# - chown -R www-data:www-data media_files
-# - chmod -R 755 media_files
-
-# Buscar o id do usuario e id do grupo
 uid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 3)
 gid_usuario=$(grep "^www-data:" /etc/passwd | cut -d ':' -f 4)
-sudo s3fs $s3_bucket_name media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002
+sudo s3fs $s3_bucket_name media_files -ouid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002,iam_role=auto
 
-# Registra no fstab o código para montar o s3fs ao inicializar
-sudo su -c "echo $s3_bucket_name /home/mediacms.io/mediacms/media_files fuse.s3fs _netdev,uid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002  0 0 >> /etc/fstab"
+sudo su -c "echo $s3_bucket_name /home/mediacms.io/mediacms/media_files fuse.s3fs _netdev,uid=$uid_usuario,gid=$gid_usuario,allow_other,mp_umask=002,iam_role=auto  0 0 >> /etc/fstab"
 
-# Baixando o projeto
 cd /home/mediacms.io/
 mkdir temp_repo
 cd temp_repo
@@ -71,20 +51,15 @@ mv /home/mediacms.io/temp_repo/* /home/mediacms.io/temp_repo/.* /home/mediacms.i
 
 cd /home/mediacms.io/mediacms/
 
-# Instala dependencia do Python para variáveis 
-# de ambiente e boto3
 echo "python-dotenv==1.0.0" >> requirements.txt
 echo "boto3==1.28.9" >> requirements.txt
 echo "botocore==1.31.9" >> requirements.txt
 echo "s3transfer==0.6.1" >> requirements.txt
 
-# Usar dotenv para inserir os variáveis no código
 sed -i "/DEBUG = False/c\import boto3\nimport json\n\nDEBUG = False\n\nssm_client = boto3.client(\"ssm\", region_name='$region')\n\nresponse = ssm_client.get_parameter(Name=\"mediacms\", WithDecryption=False)\nparameter = json.loads(response[\"Parameter\"][\"Value\"])" /home/mediacms.io/mediacms/cms/settings.py
 
-# Define o endereço das mídias. Usar com https
 sudo sed -i 's#MEDIA_URL = "/media/"#MEDIA_URL = f\"\"\"https://{parameter[\"cloudfront_domain_name\"]}/\"\"\"#g' /home/mediacms.io/mediacms/cms/settings.py
 
-# Define os dados do EMAIL e SES
 sudo sed -i 's#EMAIL_HOST_USER = "info@mediacms.io"#EMAIL_HOST_USER = parameter["smtp_user"]#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#"info@mediacms.io"#parameter["sns_email"]#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#"xyz"#parameter["smtp_password"]#g' /home/mediacms.io/mediacms/cms/settings.py
@@ -94,20 +69,15 @@ sudo sed -i 's#GLOBAL_LOGIN_REQUIRED = False#GLOBAL_LOGIN_REQUIRED = True#g' /ho
 sudo sed -i 's#UPLOAD_MEDIA_ALLOWED = True#UPLOAD_MEDIA_ALLOWED = False#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#CAN_ADD_MEDIA = "all"#CAN_ADD_MEDIA = "advancedUser"#g' /home/mediacms.io/mediacms/cms/settings.py
 
-# Redis
 sudo sed -i 's#//127.0.0.1#//"+parameter["redis_endpoint"]+"#g' /home/mediacms.io/mediacms/cms/settings.py
 
-# Localização
 sudo sed -i 's#en-us#pt-br#g' /home/mediacms.io/mediacms/cms/settings.py
 sudo sed -i 's#Europe/London#America/Recife#g' /home/mediacms.io/mediacms/cms/settings.py
 
-# Tema
 sudo sed -i 's#"light"#"dark"#g' /home/mediacms.io/mediacms/cms/settings.py
 
-# Define as credenciais do banco
 sudo sed -i 's#"HOST": "127.0.0.1"#"HOST": parameter["rds_addr"]#g' /home/mediacms.io/mediacms/cms/settings.py
 
-# Instalação do MediacMS
 echo "Welcome to the MediacMS installation!";
 
 osVersion=$(lsb_release -d)
@@ -119,7 +89,6 @@ else
     exit
 fi
 
-# install ffmpeg
 echo "Downloading and installing ffmpeg"
 wget -q https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
 mkdir -p tmp
@@ -132,13 +101,9 @@ instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`
 PORTAL_NAME="$instance_id - Oficina de Projetos 12"
 FRONTEND_HOST="$full_domain"
 
-echo 'Creating database to be used in MediaCMS'
-
 su -c "psql -c \"CREATE DATABASE mediacms\"" postgres
 su -c "psql -c \"CREATE USER mediacms WITH ENCRYPTED PASSWORD 'mediacms'\"" postgres
 su -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms\"" postgres
-
-echo 'Creating python virtualenv on /home/mediacms.io'
 
 cd /home/mediacms.io
 virtualenv . --python=python3
@@ -165,15 +130,8 @@ mkdir pids
 
 if [ -f "$file" ]
 then
-
-    echo "##############################"
     echo "# Banco de dados incializado #"
-    echo "# Acesso: admin | adm2023cms #"
-    echo "##############################"
-
 else
-
-    # Limpando o Banco
     export PGHOST=$rds_addr
     export PGPORT=5432
     export PGDATABASE=postgres
@@ -189,13 +147,9 @@ else
     python manage.py loaddata fixtures/categories.json
     python manage.py collectstatic --noinput
 
-    # ADMIN_PASS=`python -c "import secrets;chars = 'abcdefghijklmnopqrstuvwxyz0123456789';print(''.join(secrets.choice(chars) for i in range(10)))"`
     ADMIN_PASS=adm2023cms
-    # $sns_email
     echo "from users.models import User; User.objects.create_superuser('admin', 'admin@example.com', '$ADMIN_PASS')" | python manage.py shell
-
     echo "from django.contrib.sites.models import Site; Site.objects.update(name='$FRONTEND_HOST', domain='$FRONTEND_HOST')" | python manage.py shell
-
 fi
 
 chown -R www-data. /home/mediacms.io/
@@ -221,52 +175,31 @@ cp deploy/local_install/nginx.conf /etc/nginx/
 systemctl stop nginx
 systemctl start nginx
 
-# Bento4 utility installation, for HLS
-
 cd /home/mediacms.io/mediacms
 wget http://zebulon.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-637.x86_64-unknown-linux.zip
 unzip Bento4-SDK-1-6-0-637.x86_64-unknown-linux.zip
 mkdir /home/mediacms.io/mediacms/media_files/hls
 
-
-# Criando arquivo que define que, para estas configuracoes, uma instalacao ja existe.
-# Se outra instancis iniciar, ela deve verificar se este arquivo existe para que
-# nao inicialize o banco de dados novamente.
 sudo su -c "echo started > /home/mediacms.io/mediacms/media_files/started.info"
 
-# Download do banner e imagem do usuario (logo) padrao
 sudo wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/banner.jpg
 sudo wget -P /home/mediacms.io/mediacms/media_files/userlogos https://raw.githubusercontent.com/ricardoteix/ct-oficinadeprojetos-12/10d4baa3b3a5a228092c41b5008284a4c94a776a/usando_ami/subir_para_bucket/userlogos/user.jpg
 
-# last, set default owner
 chown -R www-data. /home/mediacms.io/
-
 echo 'MediaCMS installation completed, open browser on http://'"$FRONTEND_HOST"' and login with user admin and password '"$ADMIN_PASS"''
-
 echo 'O login do administrador é admin e a senha é '"$ADMIN_PASS"'' > /home/mediacms.io/mediacms/admin.txt
 
-# Desabilita celery_long para evitar processamento de video
 upload=`curl http://169.254.169.254/latest/meta-data/tags/instance | grep -c "ProcessUpload"`
 if [[ $upload -eq 0 ]];
 then
     systemctl stop celery_long
 else
 
-    sudo su -c echo "##################################################################' >> /var/log/syslog"
-    sudo su -c echo "#### Criando serviço para desligar a instância quando inativa ####' >> /var/log/syslog"
-    sudo su -c echo "##################################################################' >> /var/log/syslog"
-
     cd /home/mediacms.io/mediacms/
 
     sudo su -c "echo ${upload_cpu_check_script} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.sh"
     sudo chmod +x /home/mediacms.io/mediacms/cpu_check.sh
-
-    # sudo echo "${upload_cpu_check_script}" > /home/mediacms.io/mediacms/cpu_check.sh
-    # sudo chmod +x /home/mediacms.io/cpu_check.sh
-
     sudo su -c "echo ${upload_cpu_check_service} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.service"
-    # sudo echo "${upload_cpu_check_service}" > /home/mediacms.io/mediacms/cpu_check.service
-
     sudo su -c "mv /home/mediacms.io/mediacms/cpu_check.service /etc/systemd/system/"
     
     systemctl daemon-reload
@@ -278,10 +211,6 @@ else
     echo "######################"
 fi
 
-echo '############### Publicando SNS ################'
-
 echo Publicando SNS
 topic_arn="$sns_topic_arn"
 aws sns publish --topic-arn $topic_arn --message "Implantação do Projeto finalizada. Senha admin: $ADMIN_PASS"
-
-echo "################# FIM ###################"
