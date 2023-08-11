@@ -1,7 +1,8 @@
 resource "aws_s3_bucket" "projeto-static" {
   bucket = var.nome-bucket
 
-  force_destroy = true # CUIDADO! Em um ambiente de produção você pode não querer apagar tudo no bucket
+  # CUIDADO! Em um ambiente de produção você pode não querer apagar tudo no bucket
+  force_destroy = true 
 
   tags = {
     Name = var.tag-base
@@ -26,7 +27,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "projeto-static-config" {
 }
 
 
-# Enviando .env ao S3
 resource "random_string" "random_etag" {
   length  = 6
   special = false
@@ -34,18 +34,6 @@ resource "random_string" "random_etag" {
   lower   = true
   numeric  = true
 }
-
-# resource "aws_s3_object" "env_upload" {
-#   bucket = var.nome-bucket
-#   key    = ".env"
-#   source = "${path.module}/usando_ami/.env"
-#   etag   = "${random_string.random_etag.result}"
-  
-#   depends_on = [ 
-#     local_file.dot_env,
-#     aws_s3_bucket.projeto-static
-#   ]
-# }
 
 resource "aws_s3_object" "banner_upload" {
   bucket = var.nome-bucket
