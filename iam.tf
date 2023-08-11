@@ -1,38 +1,3 @@
-# IAM User S3
-resource "aws_iam_user" "s3_user" {
-  name = "s3_user"
-  path = "/"
-
-  tags = {
-    tag-key = "${var.tag-base}"
-  }
-}
-
-resource "aws_iam_access_key" "s3_user_key" {
-  user = aws_iam_user.s3_user.name
-}
-
-resource "aws_iam_user_policy" "s3_user_policy" {
-  name = "s3_user_policy"
-  user = aws_iam_user.s3_user.name
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "*"
-      ],
-      "Effect": "Allow",
-      "Resource": "*"
-    }
-  ]
-}
-EOF
-}
-
-
 # IAM Role 
 resource "aws_iam_role" "projeto-role" {
   name = "${var.tag-base}-role"
@@ -76,19 +41,25 @@ resource "aws_iam_role_policy" "projeto-policy" {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
-                "sns:Publish",
-                "s3:ListBucket"
+                "sns:Publish"
             ],
             "Resource": [
-                "arn:aws:s3:::${var.nome-bucket}",
                 "${aws_sns_topic.projeto-events.arn}"
             ]
         },
         {
             "Sid": "VisualEditor1",
             "Effect": "Allow",
-            "Action": "*",
-            "Resource": "arn:aws:s3:::${var.nome-bucket}/*"
+            "Action": [
+              "s3:DeleteObject",
+              "s3:GetObject",
+              "s3:ListBucket",
+              "s3:PutObject"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${var.nome-bucket}",
+              "arn:aws:s3:::${var.nome-bucket}/*"
+            ]
         },
         {
             "Sid": "AllowGetParameterStoreMediaCMS",
