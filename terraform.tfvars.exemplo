@@ -1,79 +1,155 @@
+# pt-br
 # Renomeie este arquivo, ou crie outro, com nome terraform.tfvars
 # Depois adicione os valores desejados para as variáveis abaixo.
 # Isto evitará que sejam solicitados valores para estas variávies 
 # quando forem executados os comandos do terraform.
-
+# Os valores "mediacms" abaixo são padrão da plataforma 
+# e não devem ser alterados.
+# en-us
+# Rename this file, or create a new one, named terraform.tfvars
+# Then add the desired values for the variables below.
+# This will prevent values for these variables from being
+# prompted when Terraform commands are executed.
+# The "mediacms" values below are platform defaults
+# and should not be changed.
 rds-identificador = "projeto12"
-rds-nome-usuario = "mediacms" # Padrão da plataforma
-rds-senha-usuario = "mediacms"  # Padrão da plataforma
-rds-nome-banco = "mediacms"  # Padrão da plataforma
+rds-nome-usuario = "mediacms"
+rds-senha-usuario = "mediacms" a
+rds-nome-banco = "mediacms"
 rds-tipo-instancia = "db.t3.micro"
 
+# pt-br
 # Assim que iniciar o processo, você receberá um email
-# autorizando o SNS. Aceite!
+# autorizando o SNS. Acesse o email para aceitar.
 # ocê receberá um email quando finalizar a instalação
+# en-us
+# As soon as the process starts, you will receive an email
+# authorizing the SNS. Access the email to accept.
+# You will receive an email when the installation is complete.
 sns-email="seuemail@gmail.com"
 
+# pt-br
 # t3a.small não está no free tier
-# O mediacms não funcionou bem com a t3.micro
-ec2-tipo-instancia="t3a.small" # 2 vCPU, 2 GB para testes
+# O mediacms não funcionou bem com a t3.micro.
+# Sugiro usar a t3a.small, com 2 vCPU e 2 GB, para testes.
+# en-us
+# t3a.small is not in the free tier.
+# Mediacms didn't perform well with t3.micro.
+# I suggest using t3a.small, with 2 vCPUs and 2 GB, for testing.
+ec2-tipo-instancia="t3a.small" 
 
+# pt-br
 # Nome do certificado para ser usado.
 # Se for wildcard usar com * como neste exemplo.
+# en-us
+# Certificate name to be used.
+# If it's a wildcard certificate, use * as in this example.
 certificate-domain="*.seudominio.com.br"
 
+# pt-br
 # Como o bucket deve ser unico em toda a AWS, 
 # sugiro modifica este nome para evitar conflito.
+# en-us
+# Since the bucket must be unique across all of AWS,
+# I suggest changing this name to avoid conflicts.
 nome-bucket = "ct-projeto12-2023-mediacms"  
 
+# pt-br
 # Se true, cria a entrada www na zona especificada.
+# en-us
+# If true, creates the www entry in the specified zone.
 create-domain-www=false
 
+# pt-br
 # Nome na zona hospedada
+# en-us
+# Name in the hosted zone
 hosted_zone_name = "seudominio.com.br" 
 
+# pt-br
 # Se tem um domínio no Route53 especifique aqui
 # e informe a zona e o subdomínio a ser criado.
+# en-us
+# If you have a domain in Route53, specify it here
+# and provide the zone and subdomain to be created.
 has-domain=false
 
+# pt-br
 # subdominio que será criado sob o hosted_zone_name
+# en-us
+# Subdomain to be created under the hosted_zone_name
 domain="mediacms" # subdominio
 
+# pt-br
 # Nome do profile criado com AWS CLI com as
 # credenciais do IAM.
+# en-us
+# Name of the profile created with AWS CLI
+# with IAM credentials.
 profile = "meuprofile"
 
+# pt-br
 # Especifique o valor da tag padrão utilizada nos 
 # nomes dos serviços
+# en-us
+# Specify the value of the default tag used in service names
 tag-base = "projeto12"
 
+# pt-br
 # Especifique o nome da chave pem 
 # para associar a instância.
 # Esta chave já deve existir na AWS
+# en-us
+# Specify the name of the PEM key
+# to associate with the instance.
+# This key should already exist in AWS.
 ec2-chave-instancia = "nome_chave_pem"
 
+# pt-br
 # Para uma implanatação de teste 8 GB são suficientes
 # Para um uso mais intenso de envio de vídeos será preciso
 # aumentar este valor dependendo do volume de vídeos.
+# en-us
+# For a test deployment, 8 GB is sufficient.
+# For more intensive video uploading usage, you will need
+# to increase this value depending on the volume of videos.
 ec2-tamanho-ebs = 8
 
+# pt-br
 # Se não estiver usando a AMI do projeto, será preciso 
 # definir esta variável como true uma vez que o projeto
 # baixa recursos do Github
+# en-us
+# If you're not using the project's AMI, you will need
+# to set this variable to true since the project
+# downloads resources from Github.
 ec2-usar-ip-publico = true
 
+# pt-br
 # TODO Implementar o uso do NAT Gateway para evitar usod
 # de ip público durante implantação.
+# en-us
+# TODO Implementar o uso do NAT Gateway para evitar o uso
+# de IP público durante a implantação.
 
+# pt-br
 # Definição da quatidade de instâncias no AutoScaling
+# en-us
+# Definition of the number of instances in AutoScaling
 autoscaling-min = 1
 autoscaling-max = 5
 autoscaling-desejado = 1
 
+# pt-br
 # Especifique o nome do arquivo para carregar no user_data
 # caso deseje um diferente do padrão que está na raiz
 # deste repositório, projeto_user_data.sh.
+# en-us
+# Specify the filename to load in user_data
+# if you want a different one from the default located in
+# the root of this repository, projeto_user_data.sh.
 
+# pt-br
 # Especificando novo arquivo para usar no user_data.
 # Existem dois arquivos de user_data disponíveis:
 # O primeiro na raiz do projeto (projeto_user_data.sh) que deve
@@ -81,17 +157,37 @@ autoscaling-desejado = 1
 # O segundo, na pasta usando_ami (image_user_data.sh) deve ser
 # usando quando uma AMI foi gerada a partir de uma implantação
 # com base no primeiro.
+# en-us
+# Specifying a new file to use in user_data.
+# There are two available user_data files:
+# The first one in the project root (projeto_user_data.sh) which
+# should be used when the AMI is a fresh AWS Ubuntu image.
+# The second one, in the using_ami folder (image_user_data.sh), should
+# be used when an AMI was generated from a deployment based on the first.
 arquivo-user-data = "projeto_user_data.sh"
 
+# pt-br
 # Caso não seja definida será usada a do Ubuntu 20 (ami-028a8210e4ccd79b6)
 # Obs: Não especifique esta variável se a AMI do projeto
 # não estiver mais disponível.
+# en-us
+# If not defined, Ubuntu 20's AMI will be used (ami-028a8210e4ccd79b6)
+# Note: Do not specify this variable if the project's AMI
+# is no longer available.
 ec2-ami = "ami-028a8210e4ccd79b6"
 
+# pt-br
 # Valores possíveis: 0 ou 1
 # Se estiver definido como 1 vai criar a EC2, Lambda e
 # relacionar com o S3 para disparar o trigger e ligar 
 # a instância quando um novo vídeo chegar.
 # Necessario para separar o processamento do vídeo em 
 # uma instância exclusiva.
+# en-us
+# Possible values: 0 or 1
+# If set to 1, it will create the EC2, Lambda, and
+# associate them with S3 to trigger and start
+# the instance when a new video arrives.
+# Necessary to offload video processing to
+# a dedicated instance.
 use-upload-instance = 1
