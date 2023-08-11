@@ -1,13 +1,24 @@
-# Intro
+[<img src="https://em-content.zobj.net/thumbs/120/openmoji/338/flag-united-states_1f1fa-1f1f8.png" alt="us flag" width="48"/>](./README_en.md)
 
-Este projeto permite criar a infraestrutura mínima na AWS para execução de carga de trabalho baseada em uma única instância EC2.
-A proposta é criar todos os recursos necessários, como VPC, Subnet, Route Tables, EC2, RDS, S3 etc, para rodar um projeto em uma instância Ubuntu, 20.04 LTS. 
+# Introdução
 
-O projeto a ser executado neste exemplo é o MediaCMS.
-Quando a implantação for finalizada a senha de acesso do admin será salva no arquivo:
-``/home/mediacms.io/mediacms/admin.txt``
+Este projeto permite criar a infraestrutura na AWS para execução do [MediaCMS](https://github.com/mediacms-io/mediacms), que consiste em um gerenciador de mídia opensource. 
 
-Toda a infraestrutura será criada via Terraform.
+A proposta é criar todos os recursos necessários, como VPC, Subnet, Route Tables, EC2, RDS, S3 etc, para rodar um projeto em uma instância Ubuntu 20.04 LTS. 
+
+A maior parte do projeto está escrito em Terraform com alguns scripts shell.
+
+É possível deverminar a configuração de alguns recursos a partir do arquivo **terraform.tfvars**. Neste repositório o arquivo [terraform.tfvars.exemplo](./terraform.tfvars.exemplo) uma base para criação do **terraform.tfvars**.
+
+# Arquitetura
+
+Abaixo temos o diagrama principal da arquitetura e um segundo diagrama com uma proposta de automação de uma instância para encoding dos vídeos.
+
+## Diagrama Principal
+![Diagrama Principal](./arquitetura/Diagrama%20Principal.png)
+
+## Diagrama Automação
+![Diagrama Automação](./arquitetura/Diagrama%20Automacao.png)
 
 # Terraform
 
@@ -60,7 +71,7 @@ Além da configuração do profile será preciso definir algumas variáveis.
 
 Para evitar expor dados sensíveis no git, como senha do banco de dados, será preciso copiar o arquivo ``terraform.tfvars.exemplo`` para ``terraform.tfvars``.
 
-No arquivo ``terraform.tfvars`` redefina os valores das variáveis. Perceba que será necessário ter um domínio já no Route53 para que seja fornecido o Zone ID.
+No arquivo ``terraform.tfvars`` redefina os valores das variáveis. Perceba que será necessário ter um domínio já no Route53 caso deseje usar um domínio e não apenas acessar via url do LoadBalancer.
 
 Todas as variáveis possíveis para este arquivo podem ser vistas no arquivo ``variables.tf``. Apenas algumas delas foram utilizadas no exemplo.
 
@@ -90,8 +101,10 @@ terraform apply --auto-approve
 
 ###  Destruindo toda sua infraestrutura
 
-<span style="color:RED">\*CUIDADO!\* <br>
-Após a execução dos comandos abaixo você perderá tudo que foi especificado no seu arquivo Terraform (banco de dados, EC2, EBS etc).</span>.
+<font color="red">
+  <span><b>CUIDADO!</b><br>
+  Após a execução dos comandos abaixo você perderá tudo que foi especificado no seu arquivo Terraform (banco de dados, EC2, EBS etc).</span>.
+</font>
 
 ```
 terraform destroy
@@ -101,43 +114,41 @@ ou, para confirmar automáticamente.
 terraform destroy --auto-approve
 ```
 
-## Pós criação da infraestrutura
+## O arquivo terraform.tfvars
 
-Após executar o ``terraform apply``, é apresentado no terminal quantos recursos forma adicionados, alterados ou destruídos na sua infra.
 
-No nosso código adicionamos mais algumas informações de saída (outputs) necessárias para acessarmos os recursos criados, como o banco de dados. Observe abaixo.
 
-O acesso à aplicação será pelo endereço apresentado no ``projeto-dns``, que também pode ser utilizado para acessar a instância.
+## Considerações sobre a criação da infraestrutura
 
-O endereço *host* para o banco de dados RDS é apresentado em ``projeto-rds-addr``. 
+1. Após executar o ``terraform apply``, é apresentado no terminal quantos recursos forma adicionados, alterados ou destruídos na sua infra.
 
-Ser quiser observar os parâmetros do PHP no servidor acesse o endereço apresentado em ``server``.
+1. Como o [SES](https://docs.aws.amazon.com/pt_br/ses/latest/dg/request-production-access.html) é limitado à certos limites, para receber e enviar emails da plataforma você precisa validar o endereço de email que especificou. Pouco depois de executar o  ``terraform apply`` você deve receber no email especificado no **terraform.tfvars** 2 emails para confirmação e subscrição.
 
-```
-Apply complete! Resources: 23 added, 0 changed, 0 destroyed.
+1. No nosso código adicionamos mais algumas informações de saída (outputs) necessárias para acessarmos os recursos criados, como o banco de dados. Observe abaixo.
 
-Outputs:
+1. O acesso à aplicação será pelo endereço apresentado no ``elb-dns`` ou pelo domínio, caso especificado e configurado para tal.
 
-projeto-dns = "ec2-44-201-145-193.compute-1.amazonaws.com"
-projeto-id = "i-0c3289412a3104db2"
-projeto-ip = "44.201.145.193"
-projeto-rds-addr = "projeto-rds.cmfcq1p7msvt.us-east-1.rds.amazonaws.com"
-projeto-rds-endpoint = "projeto-rds.cmfcq1p7msvt.us-east-1.rds.amazonaws.com:3306"
-server = "http://ec2-44-201-145-193.compute-1.amazonaws.com/info.php"
-```
+1. Algumas configurações, como host do banco de dados, smtp e nome do bucket, serão salvas em um [System Manager Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html) chamado **mediacms**.
+
+1. Para logar inicialmente use o login **admin** e a senha **adm2023cms**.
+
+1. Ao destruir a infra, além dos dados na EC2, RDS e Elasticache, todos os arquivos do bucket serão perdidos.
 
 ---
 
 # Considerações finais
 
 Este é um projeto para experimentações e estudo do Terraform. 
-Mesmo proporcionando a criação dos recursos mínimos para execução do projeto na AWS, é desaconselhado o uso deste projeto para implantação de cargas de trabalho em ambiente produtivo. 
+Mesmo proporcionando a criação dos recursos mínimos para execução do projeto na AWS, é desaconselhado o uso deste projeto para implantação de cargas de trabalho em ambiente produtivo.
+
+Apesar de utilizar técnicas para suportar crescimento no número de acessos, não foram realizados testes em ambiente com usuários reais, apenas com simulação de teste de carga mínimo com até 200 usuários virtuais usando a ferramenta [Locust](https://locust.io/). Ver arquivos na pasta [locust-load-test](./locust-load-test/).
 
 # Referências
 
 1. [Media CMS](https://github.com/mediacms-io/mediacms/)
 1. [Media CMS - Server Installation](https://github.com/mediacms-io/mediacms/blob/main/docs/admins_docs.md#2-server-installation)
 1. [Media CMS - Configuration](https://github.com/mediacms-io/mediacms/blob/main/docs/admins_docs.md#5-configuration)
+1. [S3FS](https://github.com/s3fs-fuse/s3fs-fuse)
 1. [AWS Storage Gateway](https://aws.amazon.com/pt/storagegateway/)
 1. [Terraform](https://www.terraform.io/)
-1. [How to setup a basic VPC with EC2 and RDS using Terraform](https://dev.to/rolfstreefkerk/how-to-setup-a-basic-vpc-with-ec2-and-rds-using-terraform-3jij)
+1. [Locust](https://locust.io/)

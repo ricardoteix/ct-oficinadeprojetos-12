@@ -4,9 +4,9 @@
 # quando forem executados os comandos do terraform.
 
 rds-identificador = "projeto12"
-rds-nome-usuario = "mediacms"
-rds-senha-usuario = "mediacms"
-rds-nome-banco = "mediacms"
+rds-nome-usuario = "mediacms" # Padrão da plataforma
+rds-senha-usuario = "mediacms"  # Padrão da plataforma
+rds-nome-banco = "mediacms"  # Padrão da plataforma
 rds-tipo-instancia = "db.t3.micro"
 
 # Assim que iniciar o processo, você receberá um email
@@ -14,7 +14,9 @@ rds-tipo-instancia = "db.t3.micro"
 # ocê receberá um email quando finalizar a instalação
 sns-email="seuemail@gmail.com"
 
-ec2-tipo-instancia="t3a.small" # 2 vCPU, 1 GB
+# t3a.small não está no free tier
+# O mediacms não funcionou bem com a t3.micro
+ec2-tipo-instancia="t3a.small" # 2 vCPU, 2 GB para testes
 
 # Nome do certificado para ser usado.
 # Se for wildcard usar com * como neste exemplo.
@@ -26,6 +28,8 @@ nome-bucket = "ct-projeto12-2023-mediacms"
 
 # Se true, cria a entrada www na zona especificada.
 create-domain-www=false
+
+# Nome na zona hospedada
 hosted_zone_name = "seudominio.com.br" 
 
 # Se tem um domínio no Route53 especifique aqui
@@ -33,21 +37,35 @@ hosted_zone_name = "seudominio.com.br"
 has-domain=false
 
 # subdominio que será criado sob o hosted_zone_name
-domain="mediacms" 
-# route53-zone -> Inferido em get_general_resources.tf
+domain="mediacms" # subdominio
 
 # Nome do profile criado com AWS CLI com as
 # credenciais do IAM.
 profile = "meuprofile"
 
-# Especifique o nome da tag padrão utilizada nos nomes dos serviços
+# Especifique o valor da tag padrão utilizada nos 
+# nomes dos serviços
 tag-base = "projeto12"
 
-# Especifique o nome da chave pem para associar a instância
+# Especifique o nome da chave pem 
+# para associar a instância.
+# Esta chave já deve existir na AWS
 ec2-chave-instancia = "nome_chave_pem"
 
+# Para uma implanatação de teste 8 GB são suficientes
+# Para um uso mais intenso de envio de vídeos será preciso
+# aumentar este valor dependendo do volume de vídeos.
 ec2-tamanho-ebs = 8
 
+# Se não estiver usando a AMI do projeto, será preciso 
+# definir esta variável como true uma vez que o projeto
+# baixa recursos do Github
+ec2-usar-ip-publico = true
+
+# TODO Implementar o uso do NAT Gateway para evitar usod
+# de ip público durante implantação.
+
+# Definição da quatidade de instâncias no AutoScaling
 autoscaling-min = 1
 autoscaling-max = 5
 autoscaling-desejado = 1
@@ -56,21 +74,24 @@ autoscaling-desejado = 1
 # caso deseje um diferente do padrão que está na raiz
 # deste repositório, projeto_user_data.sh.
 
-# Especificando novo arquivo para usar no user_data
-# da AMI do projeto ct-projeto12-mediacms-v2 (ami-028a8210e4ccd79b6)
-# Obs: Não especifique esta variável se a AMI do projeto
-# não estiver mais disponível publicamente.
-arquivo-user-data = "usando_ami/image_user_data.sh"
+# Especificando novo arquivo para usar no user_data.
+# Existem dois arquivos de user_data disponíveis:
+# O primeiro na raiz do projeto (projeto_user_data.sh) que deve
+# ser usando quando a AMI for um ubuntu do zero da AWS.
+# O segundo, na pasta usando_ami (image_user_data.sh) deve ser
+# usando quando uma AMI foi gerada a partir de uma implantação
+# com base no primeiro.
+arquivo-user-data = "projeto_user_data.sh"
 
-# AMI do projeto: ct-projeto12-mediacms-v2 (ami-028a8210e4ccd79b6)
-# Caso não seja definida será usada a do Ubuntu 20
+# Caso não seja definida será usada a do Ubuntu 20 (ami-028a8210e4ccd79b6)
 # Obs: Não especifique esta variável se a AMI do projeto
-# não estiver mais disponível publicamente.
-# ec2-ami = "ami-0c4f7023847b90238" # ubuntu 20.04
-ec2-ami = "ami-085937d2247364b89" # ami-v3
+# não estiver mais disponível.
+ec2-ami = "ami-028a8210e4ccd79b6"
 
 # Valores possíveis: 0 ou 1
 # Se estiver definido como 1 vai criar a EC2, Lambda e
 # relacionar com o S3 para disparar o trigger e ligar 
 # a instância quando um novo vídeo chegar.
+# Necessario para separar o processamento do vídeo em 
+# uma instância exclusiva.
 use-upload-instance = 1
