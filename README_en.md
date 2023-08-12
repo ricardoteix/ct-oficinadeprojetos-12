@@ -138,11 +138,19 @@ This project is designed for experimentation and studying Terraform. Although it
 
 Despite employing techniques to support scalability in terms of user access, no real user testing has been conducted. Only minimal load testing simulations were performed with up to 200 virtual users using the [Locust](https://locust.io/) tool. See files in the[locust-load-test](./locust-load-test/) folder.
 
+It's recommended to use this project based on an AMI that needs to be created after deployment. Please read the recommendation in [usando_ami/README_en.md](usando_ami/README_en.md).
+
 # Known Issues
 
 1. The application performs multipart uploads for files considered large, larger than 4 MB apparently. Since the Lambda is triggered by the S3 ``CompleteMultipartUpload`` event, these smaller files won't trigger the Lambda. Tests need to be conducted with the PUT/POST trigger to determine whether they might cause issues by creating files in the same bucket.
 
-2. Currently, the Lambda trigger fires when files with extensions .mp4, .m4v, .mov, and .avi arrive in any location within the bucket. Ideally, it should trigger when the file arrives in a specific folder, which hasn't been identified yet.
+1. To access files, the ``MEDIA_URL`` variable has been set to the Cloudfront URL. Although this causes videos to be viewed via Cloudfront, the video previews and the banner are not loading correctly from Cloudfront because the application concatenates the website address with the Cloudfront address.
+
+1. A secure method of accessing Cloudfront files only for authenticated users needs to be defined. In the current setup, anyone with the Cloudfront video URL can access the content through other means. One possible solution would be to use Cloudfront signed cookies. Further investigation is needed.
+
+1. If the instance is shutting down, in the stopping state, and a video is uploaded during that time, the Lambda won't locate the instance. Redundancy is needed in this case to check and restart the instance if necessary. One possibility could be to check, before shutting down the instance, if there are videos to be processed by celery_long.
+
+1. After uploading the first video, a new upload can only be done through the /upload address of the installation. Some configurations were set up to restrict all users from uploading, but this wasn't the expected behavior. 
 
 # References
 

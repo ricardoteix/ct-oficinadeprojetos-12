@@ -98,7 +98,7 @@ rm -rf tmp ffmpeg-release-amd64-static.tar.xz
 echo "ffmpeg installed to /usr/local/bin"
 
 instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`
-PORTAL_NAME="$instance_id - Oficina de Projetos 12"
+PORTAL_NAME="Media CMS"
 FRONTEND_HOST="$full_domain"
 
 su -c "psql -c \"CREATE DATABASE mediacms\"" postgres
@@ -128,6 +128,8 @@ echo "LOCAL_INSTALL = True" >> cms/local_settings.py
 mkdir logs
 mkdir pids
 
+file=/home/mediacms.io/mediacms/media_files/started.info
+
 if [ -f "$file" ]
 then
     echo "# Banco de dados incializado #"
@@ -138,7 +140,7 @@ else
     export PGUSER=mediacms
     export PGPASSWORD=mediacms
 
-    psql -c "DROP DATABASE IF EXISTS mediacms"
+    # psql -c "DROP DATABASE IF EXISTS mediacms"
     psql -c "CREATE DATABASE mediacms"
     psql -c "GRANT ALL PRIVILEGES ON DATABASE mediacms TO mediacms"
 
@@ -193,23 +195,20 @@ upload=`curl http://169.254.169.254/latest/meta-data/tags/instance | grep -c "Pr
 if [[ $upload -eq 0 ]];
 then
     systemctl stop celery_long
-else
-
-    cd /home/mediacms.io/mediacms/
-
-    sudo su -c "echo ${upload_cpu_check_script} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.sh"
-    sudo chmod +x /home/mediacms.io/mediacms/cpu_check.sh
-    sudo su -c "echo ${upload_cpu_check_service} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.service"
-    sudo su -c "mv /home/mediacms.io/mediacms/cpu_check.service /etc/systemd/system/"
-    
-    systemctl daemon-reload
-    systemctl start cpu_check.service
-    systemctl enable cpu_check.service
-
-    echo "######################"
-    echo "# Fim da Implantacao #"
-    echo "######################"
 fi
+
+cd /home/mediacms.io/mediacms/
+
+sudo su -c "echo ${upload_cpu_check_script} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.sh"
+sudo chmod +x /home/mediacms.io/mediacms/cpu_check.sh
+sudo su -c "echo ${upload_cpu_check_service} | base64 --decode > /home/mediacms.io/mediacms/cpu_check.service"
+sudo su -c "mv /home/mediacms.io/mediacms/cpu_check.service /etc/systemd/system/"
+
+systemctl daemon-reload
+systemctl start cpu_check.service
+systemctl enable cpu_check.service
+
+echo "# Fim da Implantacao #"
 
 echo Publicando SNS
 topic_arn="$sns_topic_arn"

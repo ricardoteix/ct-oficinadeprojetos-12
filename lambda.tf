@@ -115,29 +115,41 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
     lambda_function {
         lambda_function_arn = aws_lambda_function.mediacms-upload-control[0].arn
-        events              = ["s3:ObjectCreated:CompleteMultipartUpload"]
-        # filter_prefix       = "original/"
+        events              = [
+          "s3:ObjectCreated:CompleteMultipartUpload",
+          "s3:ObjectCreated:Put"
+        ]
+        filter_prefix       = "original/"
         filter_suffix       = ".mp4"
     }
 
     lambda_function {
         lambda_function_arn = aws_lambda_function.mediacms-upload-control[0].arn
-        events              = ["s3:ObjectCreated:CompleteMultipartUpload"]
-        # filter_prefix       = "original/"
+        events              = [
+          "s3:ObjectCreated:CompleteMultipartUpload",
+          "s3:ObjectCreated:Put"
+        ]
+        filter_prefix       = "original/"
         filter_suffix       = ".mov"
     }
 
     lambda_function {
         lambda_function_arn = aws_lambda_function.mediacms-upload-control[0].arn
-        events              = ["s3:ObjectCreated:CompleteMultipartUpload"]
-        # filter_prefix       = "original/"
+        events              = [
+          "s3:ObjectCreated:CompleteMultipartUpload",
+          "s3:ObjectCreated:Put"
+        ]
+        filter_prefix       = "original/"
         filter_suffix       = ".avi"
     }
 
     lambda_function {
         lambda_function_arn = aws_lambda_function.mediacms-upload-control[0].arn
-        events              = ["s3:ObjectCreated:CompleteMultipartUpload"]
-        # filter_prefix       = "original/"
+        events              = [
+          "s3:ObjectCreated:CompleteMultipartUpload",
+          "s3:ObjectCreated:Put"
+        ]
+        filter_prefix       = "original/"
         filter_suffix       = ".m4v"
     }
   

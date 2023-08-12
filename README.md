@@ -142,11 +142,19 @@ Mesmo proporcionando a criação dos recursos mínimos para execução do projet
 
 Apesar de utilizar técnicas para suportar crescimento no número de acessos, não foram realizados testes em ambiente com usuários reais, apenas com simulação de teste de carga mínimo com até 200 usuários virtuais usando a ferramenta [Locust](https://locust.io/). Ver arquivos na pasta [locust-load-test](./locust-load-test/).
 
+É recomendado usar este projeto com base em uma AMI que precisa ser criada após o deploy. Leia a recomendação em [usando_ami/README.md](usando_ami/README.md).
+
 # Problemas conhecidos
 
 1. A aplicação faz multipart upload para arquivos considerados grandes, maiores que 4 MB aparentemente. Como a Lambda executa com um o trigger ``CompleteMultipartUpload`` do S3, esses arquivos menores não distaram a Lambda. É preciso fazer testes com o trigger de PUT/POST e verificar se poderão gerar problemas por criar arquivos no mesmo bucket.
 
-1. Atualmente o trigger da Lambda dispara quando os arquivos .mp4, .m4v, .mov e .avi chegam em qualquer local do bucket. Idealmente deveria ocorrer quando o arquivo chegar em uma pasta específica, ainda não identificada.
+1. Para acessar os arquivos a variável ``MEDIA_URL`` recebeu o valor da url do Cloudfront. Mesmo que isso faça com que os vídeos seja assistidos vai Cloudfront, as prévias dos vídeos e o banner não estão carregando corretamente vindo do Cloudfront porque a aplicação concatena o endereço do site junto ao do Cloudfront.
+
+1. É preciso definir uma forma segura de acessar os arquivos do Cloudfront apenas por usuários autenticados. Da forma atual quem tem a url do vídeo via Cloudfront pode acessar por outros meios. Uma possível solução seriam os signed cookies do Cloudfront. Carece de investiação.
+
+1. Se a instância estiver se desligando, ou seja, no estado stopping, e um vídeo foi enviado neste momento, a Lambda não vai encontrar a instância. É preciso colocar uma redundância neste caso para verificar ligdar novamente a instância. Uma possibilidade seria verificar, antes de desligar a instância, se há vídeos para serem processados pelo celery_long.
+
+1. Após enviar o primeiro vídeo, um novo upload só pode ser feito pelo endereço /upload da instalação. Algumas configurações foram feitas para restringir que todos os usuários fizem upload, mas este não era um comportamento esperado. 
 
 # Referências
 

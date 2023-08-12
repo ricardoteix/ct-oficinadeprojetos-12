@@ -1,17 +1,4 @@
-
 # Exibindo dados no console após criaçao
-
-# output "projeto-id" {
-#   value = aws_instance.projeto.id
-# }
-
-# output "projeto-dns" {
-#   value = aws_instance.projeto.public_dns
-# }
-
-# output "projeto-ip" {
-#   value = aws_instance.projeto.public_ip
-# }
 
 output "elb-dns" {
   value = aws_lb.projeto-elb.dns_name
@@ -40,15 +27,6 @@ output "projeto-rds-host" {
 output "nome-bucket" {
   value = var.nome-bucket
 }
-
-# output "s3-user-id" {
-#   value = aws_iam_access_key.s3_user_key.id
-# }
-
-# output "s3-user-secret" {
-#   value = aws_iam_access_key.s3_user_key.secret
-#   sensitive = true
-# }
 
 output "domain" {
   value = var.domain
