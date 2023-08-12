@@ -136,13 +136,11 @@ terraform destroy --auto-approve
 
 This project is designed for experimentation and studying Terraform. Although it provides the creation of the minimum resources to run the project on AWS, it is not recommended to use this project for deploying workloads in a production environment.
 
-Despite employing techniques to support scalability in terms of user access, no real user testing has been conducted. Only minimal load testing simulations were performed with up to 200 virtual users using the [Locust](https://locust.io/) tool. See files in the[locust-load-test](./locust-load-test/) folder.
+Despite employing techniques to support scalability in terms of user access, no real user testing has been conducted. Only minimal load testing simulations were performed with up to 200 virtual users using the [Locust](https://locust.io/) tool. See files in the [locust-load-test](./locust-load-test/) folder.
 
 It's recommended to use this project based on an AMI that needs to be created after deployment. Please read the recommendation in [usando_ami/README_en.md](usando_ami/README_en.md).
 
 # Known Issues
-
-1. The application performs multipart uploads for files considered large, larger than 4 MB apparently. Since the Lambda is triggered by the S3 ``CompleteMultipartUpload`` event, these smaller files won't trigger the Lambda. Tests need to be conducted with the PUT/POST trigger to determine whether they might cause issues by creating files in the same bucket.
 
 1. To access files, the ``MEDIA_URL`` variable has been set to the Cloudfront URL. Although this causes videos to be viewed via Cloudfront, the video previews and the banner are not loading correctly from Cloudfront because the application concatenates the website address with the Cloudfront address.
 

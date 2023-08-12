@@ -146,8 +146,6 @@ Apesar de utilizar técnicas para suportar crescimento no número de acessos, n�
 
 # Problemas conhecidos
 
-1. A aplicação faz multipart upload para arquivos considerados grandes, maiores que 4 MB aparentemente. Como a Lambda executa com um o trigger ``CompleteMultipartUpload`` do S3, esses arquivos menores não distaram a Lambda. É preciso fazer testes com o trigger de PUT/POST e verificar se poderão gerar problemas por criar arquivos no mesmo bucket.
-
 1. Para acessar os arquivos a variável ``MEDIA_URL`` recebeu o valor da url do Cloudfront. Mesmo que isso faça com que os vídeos seja assistidos vai Cloudfront, as prévias dos vídeos e o banner não estão carregando corretamente vindo do Cloudfront porque a aplicação concatena o endereço do site junto ao do Cloudfront.
 
 1. É preciso definir uma forma segura de acessar os arquivos do Cloudfront apenas por usuários autenticados. Da forma atual quem tem a url do vídeo via Cloudfront pode acessar por outros meios. Uma possível solução seriam os signed cookies do Cloudfront. Carece de investiação.
