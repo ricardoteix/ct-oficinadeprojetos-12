@@ -154,7 +154,7 @@ autoscaling-desejado = 1
 # Existem dois arquivos de user_data disponíveis:
 # O primeiro na raiz do projeto (projeto_user_data.sh) que deve
 # ser usando quando a AMI for um ubuntu do zero da AWS.
-# O segundo, na pasta usando_ami (image_user_data.sh) deve ser
+# O segundo, na pasta usando_ami (placeholder_user_data.sh) deve ser
 # usando quando uma AMI foi gerada a partir de uma implantação
 # com base no primeiro.
 # en-us
