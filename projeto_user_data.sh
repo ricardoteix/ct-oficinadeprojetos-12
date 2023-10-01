@@ -46,6 +46,8 @@ cd temp_repo
 sudo git init 
 sudo git remote add origin https://github.com/mediacms-io/mediacms
 sudo git pull origin main 
+sudo git checkout v3.0.0
+sudo git pull origin v3.0.0
 
 mv /home/mediacms.io/temp_repo/* /home/mediacms.io/temp_repo/.* /home/mediacms.io/mediacms/
 
